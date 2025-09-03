@@ -28,7 +28,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <StepperProvider defaultStep={0}>{children}</StepperProvider>
+        {children}
       </body>
     </html>
   );
