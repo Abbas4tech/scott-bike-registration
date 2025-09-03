@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   FormField,
@@ -8,9 +9,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useStepper } from "@/components/ui/stepper";
-import { useState } from "react";
 import { BikeRegistrationFormData } from "../model/schema";
 import { useFormContext } from "react-hook-form";
+import { useVerifySerialNumberMutation } from "../services/serialNumberApi";
 
 const RegisterSerielNumber = () => {
   const { setStepCompleted, nextStep } = useStepper();
@@ -20,28 +21,17 @@ const RegisterSerielNumber = () => {
 
   const serialNumber = watch("serialNumber");
 
+  const [verifySerialNumber, { isLoading }] = useVerifySerialNumberMutation();
+  const isDisabled = !serialNumber || isLoading;
+
   const submithandler = async () => {
     try {
-      if (!serialNumber) {
-        throw new Error("Serial number is required");
-      }
-      const res = await fetch("/api/bikes", {
-        method: "POST",
-        body: JSON.stringify({ serialNumber }),
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        setStepCompleted(0, true);
-        nextStep();
-      } else {
-        setError("serialNumber", {
-          message: data.error,
-        });
-        throw new Error(data.error);
-      }
-    } catch (error) {
+      const res = await verifySerialNumber({ serialNumber }).unwrap();
+      setStepCompleted(0, true);
+      nextStep();
+    } catch (error: any) {
       console.error(error);
+      setError("serialNumber", { message: error?.data.error });
     }
   };
 
@@ -69,8 +59,8 @@ const RegisterSerielNumber = () => {
         )}
       />
 
-      <Button disabled={!serialNumber} type="button" onClick={submithandler}>
-        FIND MY BIKE
+      <Button disabled={isDisabled} type="button" onClick={submithandler}>
+        {isLoading ? "FINDING...." : "FIND MY BIKE"}
       </Button>
 
       <p className="text-sm text-gray-600">

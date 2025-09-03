@@ -1,10 +1,5 @@
-import { NextRequest } from "next/server";
-
-interface BikeModel {
-  serialNumber: string;
-  modelDescription: string;
-  shopName: string;
-}
+import { NextRequest, NextResponse } from "next/server";
+import { BikeModel } from "@/app/registeration/model/types";
 
 const mockData: BikeModel[] = [
   {
@@ -51,25 +46,35 @@ export async function POST(request: NextRequest) {
     // fake 3-second delay
     await delay(3000);
 
-    const item = mockData.find((item) => item.serialNumber === serialNumber);
+    const item = mockData.find(
+      (item) =>
+        item.serialNumber.toLowerCase() === serialNumber.trim().toLowerCase()
+    );
 
     if (item) {
-      return new Response(JSON.stringify(item), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
+      return NextResponse.json(
+        { data: item, status_code: 200 },
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     } else {
-      return new Response(
-        JSON.stringify({
+      return NextResponse.json(
+        {
           error: "Your Serial Number is wrong. Please check and try again.",
-        }),
+          status_code: 404,
+        },
         { status: 404, headers: { "Content-Type": "application/json" } }
       );
     }
-  } catch (error) {
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+  } catch (err) {
+    return NextResponse.json(
+      { error: "Internal server error", status_code: 500 },
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }
