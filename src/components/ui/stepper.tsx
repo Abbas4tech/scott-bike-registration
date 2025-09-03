@@ -4,7 +4,6 @@ import React, {
   createContext,
   useContext,
   useState,
-  ReactNode,
   HTMLAttributes,
   forwardRef,
   PropsWithChildren,
@@ -37,12 +36,11 @@ const useStepper = () => {
 };
 
 // Stepper Provider
-interface StepperProviderProps {
-  children: ReactNode;
+type StepperProviderProps = {
   defaultStep?: number;
-}
+};
 
-const StepperProvider: FC<StepperProviderProps> = ({
+const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
   children,
   defaultStep = 0,
 }) => {
@@ -112,18 +110,17 @@ const StepperProvider: FC<StepperProviderProps> = ({
 
 // Step Component
 interface StepProps {
-  children: ReactNode;
   index?: number;
 }
 
-const Step: FC<StepProps> = ({ children, index = 0 }) => {
+const Step: FC<PropsWithChildren<StepProps>> = ({ children, index = 0 }) => {
   const { activeStep } = useStepper();
 
   if (activeStep !== index) {
     return null;
   }
 
-  return <div className="step-content">{children}</div>;
+  return <div className="step">{children}</div>;
 };
 
 // StepTitle Component
@@ -144,9 +141,18 @@ const StepTitle: FC<StepTitleProps> = forwardRef<
   );
 });
 
-const StepContent: FC<PropsWithChildren> = ({ children }) => {
-  return <div className="step-content-inner mt-4">{children}</div>;
-};
+const StepContent: FC<PropsWithChildren> = forwardRef<
+  HTMLDivElement,
+  HTMLAttributes<HTMLDivElement>
+>(({ className, ...res }, ref) => {
+  return (
+    <div
+      ref={ref}
+      {...res}
+      className={cn("step-content-inner mt-4", className)}
+    />
+  );
+});
 
 // Stepper Navigation Component
 const StepperNavigation: FC = () => {
@@ -187,7 +193,7 @@ const StepperIndicators: FC = () => {
   return (
     <div className="stepper-indicators flex justify-between mb-8 relative">
       {/* Connector line */}
-      <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 -z-10"></div>
+      <div className="absolute top-4 left-0 right-0 h-0.5 bg-blue-200 z-10"></div>
 
       {Array.from({ length: steps }).map((_, index) => {
         const completed = isStepCompleted(index);
