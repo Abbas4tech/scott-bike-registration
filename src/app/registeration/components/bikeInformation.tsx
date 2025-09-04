@@ -41,7 +41,9 @@ const BikeInformation = (): React.JSX.Element => {
           name="serialNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Serial Number</FormLabel>
+              <FormLabel className="font-sans text-neutral-400 tracking-wide font-bold">
+                Serial Number
+              </FormLabel>
               <FormControl>
                 <Input disabled placeholder="Enter first name!" {...field} />
               </FormControl>
@@ -53,7 +55,7 @@ const BikeInformation = (): React.JSX.Element => {
           width={400}
           height={400}
           alt="Bike"
-          className="object-fit border"
+          className="object-fit border border-neutral-300"
           src={"/assets/SCR29A20M24110345N.jpg"}
         />
         <FormField
@@ -61,7 +63,9 @@ const BikeInformation = (): React.JSX.Element => {
           name="modelDescription"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Model Description</FormLabel>
+              <FormLabel className="font-sans text-neutral-400 tracking-wide font-bold">
+                Model Description
+              </FormLabel>
               <FormControl>
                 <Input disabled placeholder="Enter first name!" {...field} />
               </FormControl>
@@ -74,7 +78,9 @@ const BikeInformation = (): React.JSX.Element => {
           name="shopName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Shop Name</FormLabel>
+              <FormLabel className="font-sans text-neutral-400 tracking-wide font-bold">
+                Shop Name
+              </FormLabel>
               <FormControl>
                 <Input disabled placeholder="Enter first name!" {...field} />
               </FormControl>
@@ -88,29 +94,33 @@ const BikeInformation = (): React.JSX.Element => {
           name="dateOfPurchase"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Date of Purchase</FormLabel>
+              <FormLabel className="font-sans tracking-wide font-bold">
+                Date of Purchase
+              </FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
                       variant={"outline"}
+                      size={"xl"}
                       className={cn(
-                        "w-[240px] pl-3 text-left font-normal capitalize",
+                        "pl-3 text-left font-sans font-normal capitalize hover:bg-inherit ring-offset-background justify-start border border-neutral-300 text-muted-foreground",
                         !field.value && "text-muted-foreground"
                       )}
                     >
+                      <CalendarIcon className="h-4 w-4 opacity-50" />
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
                         <span>Pick a date</span>
                       )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-full p-0" align="start">
                   <Calendar
                     mode="single"
+                    className="font-sans"
                     selected={field.value}
                     onSelect={field.onChange}
                     disabled={(date) =>
@@ -138,6 +148,7 @@ const BikeInformation = (): React.JSX.Element => {
 
         <Button
           disabled={!dop}
+          size={"lg"}
           onClick={() => {
             setStepCompleted(1, true);
             nextStep();

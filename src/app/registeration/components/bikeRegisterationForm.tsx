@@ -66,10 +66,17 @@ const BikeRegisterationForm = (): React.JSX.Element => {
       nextStep();
     }
   };
+
+  const stepLabels = [
+    "Serial number",
+    "Bike information",
+    "Personal information",
+    "Registration confirmation",
+  ];
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(submitHandler)}>
-        <StepperIndicators />
+        <StepperIndicators labels={stepLabels} />
 
         <Step index={0}>
           <StepTitle

@@ -94,16 +94,9 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
       return;
     }
 
-    if (isStepsAccessible) {
-      // original behavior: allow navigation to completed steps, first step or going back
-      const canNavigate =
-        step === 0 || completedSteps[step - 1] || step < activeStep;
-      if (canNavigate) {
-        setActiveStep(step);
-      }
-    } else {
-      // forward-only mode: only allow moving to the immediate next step (or stay on current)
-      if (step === activeStep + 1) {
+    if (!isStepsAccessible) {
+      // forward-only mode: only allow moving to the immediate next step
+      if (step === activeStep + 1 && isStepCompleted(activeStep)) {
         setActiveStep(step);
       }
     }
@@ -224,14 +217,23 @@ const StepperNavigation: FC = () => {
 };
 
 // Stepper Indicators Component
-const StepperIndicators: FC = () => {
+
+type StepIndicatorProps = {
+  labels: string[];
+};
+
+const StepperIndicators: FC<StepIndicatorProps> = ({ labels }) => {
   const { steps, activeStep, goToStep, isStepCompleted, isStepsAccessible } =
     useStepper();
+  if (labels.length !== steps) {
+    console.error("Labels of Indicator must be equal to steps");
+    return null;
+  }
 
   return (
-    <div className="stepper-indicators mx-auto max-w-md md:max-w-3xl flex justify-between mb-8 relative">
+    <div className="stepper-indicators mx-auto max-w-md md:max-w-3xl flex justify-between mb-8 md:mb-16 relative">
       {/* Connector line */}
-      <div className="absolute top-4 left-0 right-0 h-0.5 bg-blue-200 z-10" />
+      <div className="absolute top-16 left-0 right-0 h-1 rounded bg-muted z-10" />
 
       {Array.from({ length: steps }).map((_, index) => {
         const completed = isStepCompleted(index);
@@ -239,7 +241,23 @@ const StepperIndicators: FC = () => {
 
         const accessible = isStepsAccessible
           ? index === 0 || isStepCompleted(index - 1) || index < activeStep
-          : index === activeStep + 1; // forward-only mode: only immediate next step is clickable
+          : index === activeStep + 1 && isStepCompleted(activeStep);
+
+        const indicatorClasses = isStepsAccessible
+          ? `${
+              active
+                ? "border-blue-500 bg-blue-500 text-white cursor-pointer"
+                : completed
+                ? "border-green-500 bg-green-500 text-white cursor-pointer"
+                : accessible
+                ? "border-gray-300 bg-white text-gray-500 cursor-pointer"
+                : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+            }`
+          : `${
+              active
+                ? "border-blue-500 bg-blue-500 text-white cursor-pointer"
+                : "border-muted bg-muted text-gray-500 cursor-not-allowed"
+            }`;
 
         return (
           <div
@@ -248,21 +266,25 @@ const StepperIndicators: FC = () => {
             aria-current={active ? "step" : undefined}
           >
             <button
+              className="flex flex-1 flex-col items-center bg-transparent border-0"
+              role="region"
+              tabIndex={-1}
+              aria-label={`Go to step: ${index + 1}`}
               type="button"
               onClick={() => accessible && goToStep(index)}
               disabled={!accessible}
-              className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${
-                active
-                  ? "border-blue-600 bg-blue-600 text-white"
-                  : completed
-                  ? "border-green-500 bg-green-500 text-white"
-                  : accessible
-                  ? "border-gray-300 bg-white text-gray-500"
-                  : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
-              }`}
-              aria-label={`Go to step ${index + 1}`}
             >
-              {completed ? "✓" : index + 1}
+              <div
+                className={`text-xs font-sans p-3 text-center h-14 flex tracking-wide items-center justify-center cursor-default ${
+                  active ? "text-neutral-900" : "text-muted-foreground"
+                }`}
+                role="button"
+              >
+                {labels[index]}
+              </div>
+              <div
+                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${indicatorClasses}`}
+              />
             </button>
           </div>
         );
@@ -270,13 +292,6 @@ const StepperIndicators: FC = () => {
     </div>
   );
 };
-
-export const Stepper: FC<PropsWithChildren> = ({ children }) => (
-  <>
-    <StepperIndicators />
-    {children}
-  </>
-);
 
 export {
   Step,

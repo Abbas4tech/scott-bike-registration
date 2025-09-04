@@ -2,6 +2,7 @@
 import { useFormContext } from "react-hook-form";
 import { JSX } from "react";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { LoaderCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -49,7 +50,7 @@ const RegisterSerielNumber = (): JSX.Element => {
 
   return (
     <div className="flex flex-col space-y-4">
-      <p className="font-sans text-base tracking-wide">
+      <p className="font-sans text-base tracking-wide mb-6">
         Register your bike to extend your warranty by 2 years, in addition to
         the 3-year standard coverage when compliant with our{" "}
         <a href="#" className="text-blue-500 underline">
@@ -76,15 +77,28 @@ const RegisterSerielNumber = (): JSX.Element => {
 
       <Button
         disabled={isDisabled}
-        className="tracking-wider self-end"
+        size={"lg"}
+        className="tracking-wider self-end min-w-40"
         type="button"
         onClick={submithandler}
       >
-        {isLoading ? "FINDING...." : "FIND MY BIKE"}
+        {isLoading ? (
+          <LoaderCircle size={40} className="animate-spin size-6 font-bold" />
+        ) : (
+          "FIND MY BIKE"
+        )}
       </Button>
 
-      <p className="text-sm text-gray-600">
-        Where do I find my serial number on an E-Bike or a Bike?
+      <p className="text-base font-sans text-black mt-12">
+        Where do I find my serial number on an{" "}
+        <a href="#" className="text-blue-500 underline">
+          E-Bike
+        </a>{" "}
+        or a{" "}
+        <a href="#" className="text-blue-500 underline">
+          Bike
+        </a>
+        ?
       </p>
     </div>
   );
