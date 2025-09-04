@@ -41,9 +41,7 @@ const BikeInformation = (): React.JSX.Element => {
           name="serialNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="font-sans text-neutral-400 tracking-wide font-bold">
-                Serial Number
-              </FormLabel>
+              <FormLabel aria-disabled="true">Serial Number</FormLabel>
               <FormControl>
                 <Input disabled placeholder="Enter first name!" {...field} />
               </FormControl>
@@ -63,9 +61,7 @@ const BikeInformation = (): React.JSX.Element => {
           name="modelDescription"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="font-sans text-neutral-400 tracking-wide font-bold">
-                Model Description
-              </FormLabel>
+              <FormLabel aria-disabled="true">Model Description</FormLabel>
               <FormControl>
                 <Input disabled placeholder="Enter first name!" {...field} />
               </FormControl>
@@ -78,9 +74,7 @@ const BikeInformation = (): React.JSX.Element => {
           name="shopName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="font-sans text-neutral-400 tracking-wide font-bold">
-                Shop Name
-              </FormLabel>
+              <FormLabel aria-disabled="true">Shop Name</FormLabel>
               <FormControl>
                 <Input disabled placeholder="Enter first name!" {...field} />
               </FormControl>

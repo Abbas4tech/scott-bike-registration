@@ -1,13 +1,13 @@
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import React, { useMemo, memo } from "react";
+import { useFormContext } from "react-hook-form";
+
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@radix-ui/react-popover";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import React from "react";
-import { useFormContext } from "react-hook-form";
-
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,235 +32,206 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { BikeRegistrationFormData } from "../model/schema";
 
-const PersonalInformation = (): React.JSX.Element => {
-  const form = useFormContext<BikeRegistrationFormData>();
-  const { prevStep } = useStepper();
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4">
-        <FormField
-          control={form.control}
-          name="firstName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                First Name <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Input placeholder="First Name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+const COUNTRIES = [
+  { value: "us", label: "United States" },
+  { value: "uk", label: "United Kingdom" },
+  { value: "de", label: "Germany" },
+  { value: "fr", label: "France" },
+  { value: "it", label: "Italy" },
+  { value: "es", label: "Spain" },
+];
 
-        {/* Last Name Field */}
-        <FormField
-          control={form.control}
-          name="lastName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Last Name <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Input placeholder="Last Name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+const LANGUAGES = [
+  { value: "english", label: "English" },
+  { value: "french", label: "French" },
+  { value: "german", label: "German" },
+  { value: "italian", label: "Italian" },
+  { value: "spanish", label: "Spanish" },
+];
 
-      {/* Email Field */}
-      <FormField
-        control={form.control}
-        name="email"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              Email <span className="text-red-500">*</span>
-            </FormLabel>
+const GENDERS = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "other", label: "Other" },
+];
+
+const TextField = memo(
+  ({
+    name,
+    label,
+    type = "text",
+    placeholder,
+  }: {
+    name: keyof BikeRegistrationFormData;
+    label: string;
+    type?: string;
+    placeholder: string;
+  }) => (
+    <FormField
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>
+            {label} <span className="text-red-500">*</span>
+          </FormLabel>
+          <FormControl>
+            <Input placeholder={placeholder} type={type} {...field} />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  )
+);
+
+TextField.displayName = "TextField";
+
+const SelectField = memo(
+  ({
+    name,
+    label,
+    options,
+    placeholder,
+  }: {
+    name: keyof BikeRegistrationFormData;
+    label: string;
+    options: typeof COUNTRIES;
+    placeholder: string;
+  }) => (
+    <FormField
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>
+            {label} <span className="text-red-500">*</span>
+          </FormLabel>
+          <Select onValueChange={field.onChange} value={field.value}>
             <FormControl>
-              <Input placeholder="Email" type="email" {...field} />
+              <SelectTrigger className="w-full font-sans" size="default">
+                <SelectValue placeholder={placeholder} />
+              </SelectTrigger>
             </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+            <SelectContent className="w-full font-sans">
+              {options.map(({ value, label }) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  )
+);
 
-      {/* Country Field */}
-      <FormField
-        control={form.control}
-        name="country"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              Country <span className="text-red-500">*</span>
-            </FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger size="default">
-                  <SelectValue placeholder="Select your Country" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="us">United States</SelectItem>
-                <SelectItem value="uk">United Kingdom</SelectItem>
-                <SelectItem value="de">Germany</SelectItem>
-                <SelectItem value="fr">France</SelectItem>
-                <SelectItem value="it">Italy</SelectItem>
-                <SelectItem value="es">Spain</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+SelectField.displayName = "SelectField";
 
-      <hr className="my-4" />
+const RadioGroupField = memo(
+  ({
+    name,
+    label,
+    options,
+  }: {
+    name: keyof BikeRegistrationFormData;
+    label: string;
+    options: typeof LANGUAGES;
+  }) => (
+    <FormField
+      name={name}
+      render={({ field }) => (
+        <FormItem className="space-y-3">
+          <FormLabel>
+            {label} <span className="text-red-500">*</span>
+          </FormLabel>
+          <FormControl>
+            <RadioGroup
+              onValueChange={field.onChange}
+              value={field.value}
+              className="flex flex-col space-y-1"
+            >
+              {options.map(({ value, label }) => (
+                <FormItem
+                  key={value}
+                  className="flex items-center space-x-3 space-y-0 gap-0"
+                >
+                  <FormControl>
+                    <RadioGroupItem value={value} />
+                  </FormControl>
+                  <FormLabel className="font-normal">{label}</FormLabel>
+                </FormItem>
+              ))}
+            </RadioGroup>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  )
+);
 
-      {/* Preferred Language Field */}
-      <FormField
-        control={form.control}
-        name="preferredLanguage"
-        render={({ field }) => (
-          <FormItem className="space-y-3">
-            <FormLabel>
-              Preferred Language <span className="text-red-500">*</span>
-            </FormLabel>
+RadioGroupField.displayName = "RadioGroupField";
+
+const DatePickerField = memo(() => (
+  <FormField
+    name="dateOfBirth"
+    render={({ field }) => (
+      <FormItem className="flex flex-col">
+        <FormLabel className="mb-2">Birthday</FormLabel>
+        <Popover>
+          <PopoverTrigger asChild>
             <FormControl>
-              <RadioGroup
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                className="flex flex-col space-y-1"
+              <Button
+                size={"xl"}
+                variant="outline"
+                className={cn(
+                  "pl-3 text-left font-normal capitalize font-sans justify-start",
+                  !field.value && "text-muted-foreground"
+                )}
               >
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="english" />
-                  </FormControl>
-                  <FormLabel className="font-normal">English</FormLabel>
-                </FormItem>
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="french" />
-                  </FormControl>
-                  <FormLabel className="font-normal">French</FormLabel>
-                </FormItem>
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="german" />
-                  </FormControl>
-                  <FormLabel className="font-normal">German</FormLabel>
-                </FormItem>
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="italian" />
-                  </FormControl>
-                  <FormLabel className="font-normal">Italian</FormLabel>
-                </FormItem>
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="spanish" />
-                  </FormControl>
-                  <FormLabel className="font-normal">Spanish</FormLabel>
-                </FormItem>
-              </RadioGroup>
+                <CalendarIcon className="h-4 w-4 opacity-50" />
+                {field.value ? format(field.value, "PPP") : "Pick a date"}
+              </Button>
             </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={field.value}
+              onSelect={field.onChange}
+              disabled={(date) =>
+                date > new Date() || date < new Date("1900-01-01")
+              }
+              initialFocus
+              captionLayout="dropdown"
+            />
+          </PopoverContent>
+        </Popover>
+        <FormMessage />
+      </FormItem>
+    )}
+  />
+));
 
-      {/* Gender Field - Now as Radio Group */}
-      <FormField
-        control={form.control}
-        name="gender"
-        render={({ field }) => (
-          <FormItem className="space-y-3">
-            <FormLabel>
-              Gender <span className="text-red-500">*</span>
-            </FormLabel>
-            <FormControl>
-              <RadioGroup
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                className="flex flex-col space-y-1"
-              >
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="male" />
-                  </FormControl>
-                  <FormLabel className="font-normal">Male</FormLabel>
-                </FormItem>
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="female" />
-                  </FormControl>
-                  <FormLabel className="font-normal">Female</FormLabel>
-                </FormItem>
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="other" />
-                  </FormControl>
-                  <FormLabel className="font-normal">Other</FormLabel>
-                </FormItem>
-              </RadioGroup>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+DatePickerField.displayName = "DatePickerField";
 
-      {/* Birthday Field */}
-      <FormField
-        control={form.control}
-        name="dateOfBirth"
-        render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel>Birthday</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "pl-3 text-left font-normal capitalize",
-                      !field.value && "text-muted-foreground"
-                    )}
-                  >
-                    {field.value ? (
-                      format(field.value, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
-                  disabled={(date) =>
-                    date > new Date() || date < new Date("1900-01-01")
-                  }
-                  initialFocus
-                  captionLayout="dropdown"
-                />
-              </PopoverContent>
-            </Popover>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      {/* News Updates Checkbox */}
-      <FormField
-        control={form.control}
-        name="newsOptIn"
-        render={({ field }) => (
+const CheckboxField = memo(
+  ({
+    name,
+    label,
+    link,
+    linkText,
+  }: {
+    name: keyof BikeRegistrationFormData;
+    label: string;
+    link?: string;
+    linkText?: string;
+  }) => (
+    <FormField
+      name={name}
+      render={({ field }) => (
+        <div className="flex flex-col gap-1">
           <FormItem className="flex flex-row items-start space-x-3 space-y-0 gap-0">
             <FormControl>
               <Checkbox
@@ -269,64 +240,106 @@ const PersonalInformation = (): React.JSX.Element => {
               />
             </FormControl>
             <div className="space-y-1 leading-none">
-              <FormLabel>
-                I agree to receive News and Updates from SCOTT Sports.
+              <FormLabel className="gap-1 font-normal">
+                {label}
+                {link && (
+                  <a href={link} className="text-blue-600 underline">
+                    {linkText}
+                  </a>
+                )}
+                {name === "consent" && <span className="text-red-500">*</span>}
               </FormLabel>
             </div>
           </FormItem>
-        )}
-      />
+          <FormMessage />
+        </div>
+      )}
+    />
+  )
+);
 
-      {/* Privacy Policy Checkbox */}
-      <FormField
-        control={form.control}
-        name="consent"
-        render={({ field }) => (
-          <div className="flex flex-col gap-1">
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 gap-0">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel className="gap-1">
-                  I have read and accept the{" "}
-                  <a href="#" className="text-blue-600 underline">
-                    privacy policy.
-                  </a>{" "}
-                  <span className="text-red-500">*</span>
-                </FormLabel>
-              </div>
-            </FormItem>
-            <FormMessage />
-          </div>
-        )}
-      />
+CheckboxField.displayName = "CheckboxField";
 
+const PersonalInformation = (): React.JSX.Element => {
+  const { prevStep } = useStepper();
+  const form = useFormContext<BikeRegistrationFormData>();
+
+  const NavigationButtons = useMemo(
+    () => (
       <div className="mt-4 flex justify-end">
         <Button
-          size={"lg"}
-          variant={"link"}
+          size="lg"
+          variant="link"
           type="button"
           onClick={prevStep}
           className="text-blue-600 text-sm uppercase"
         >
           Previous
         </Button>
-
         <Button
-          size={"lg"}
+          size="lg"
           type="submit"
           disabled={!form.formState.isValid}
-          variant={"default"}
+          variant="default"
         >
           Submit
         </Button>
       </div>
+    ),
+    [prevStep, form.formState.isValid]
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4">
+        <TextField
+          name="firstName"
+          label="First Name"
+          placeholder="First Name"
+        />
+
+        <TextField name="lastName" label="Last Name" placeholder="Last Name" />
+
+        <TextField
+          name="email"
+          label="Email"
+          type="email"
+          placeholder="Email"
+        />
+
+        <SelectField
+          name="country"
+          label="Country"
+          options={COUNTRIES}
+          placeholder="Select your Country"
+        />
+      </div>
+
+      <RadioGroupField
+        name="preferredLanguage"
+        label="Preferred Language"
+        options={LANGUAGES}
+      />
+
+      <RadioGroupField name="gender" label="Gender" options={GENDERS} />
+
+      <DatePickerField />
+
+      <CheckboxField
+        name="newsOptIn"
+        label="I agree to receive News and Updates from SCOTT Sports."
+      />
+
+      <CheckboxField
+        name="consent"
+        label="I have read and accept the"
+        link="#"
+        linkText="privacy policy."
+      />
+
+      {NavigationButtons}
     </div>
   );
 };
 
-export default PersonalInformation;
+export default memo(PersonalInformation);
