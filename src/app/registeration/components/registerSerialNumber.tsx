@@ -48,10 +48,13 @@ const RegisterSerielNumber = (): JSX.Element => {
   };
 
   return (
-    <div className="space-y-6">
-      <p className="text-gray-600">
+    <div className="flex flex-col space-y-4">
+      <p className="font-sans text-base tracking-wide">
         Register your bike to extend your warranty by 2 years, in addition to
-        the 3-year standard coverage when compliant with our warranty policy.
+        the 3-year standard coverage when compliant with our{" "}
+        <a href="#" className="text-blue-500 underline">
+          warranty policy.
+        </a>{" "}
         Please visit our warranty policy page for more details.
       </p>
 
@@ -60,18 +63,23 @@ const RegisterSerielNumber = (): JSX.Element => {
         name="serialNumber"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="font-bold text-base">
+            <FormLabel className="font-bold text-sm font-sans">
               Enter your bike Serial Number
             </FormLabel>
             <FormControl>
-              <Input placeholder="STM34D30L24110132N" {...field} />
+              <Input placeholder="Bike serial number" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
 
-      <Button disabled={isDisabled} type="button" onClick={submithandler}>
+      <Button
+        disabled={isDisabled}
+        className="tracking-wider self-end"
+        type="button"
+        onClick={submithandler}
+      >
         {isLoading ? "FINDING...." : "FIND MY BIKE"}
       </Button>
 

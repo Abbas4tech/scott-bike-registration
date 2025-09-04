@@ -156,7 +156,7 @@ const Step: FC<PropsWithChildren<StepProps>> = ({ children, index }) => {
     return null;
   }
 
-  return <div className="step">{children}</div>;
+  return <div className="step contaienr max-w-lg mx-auto">{children}</div>;
 };
 
 // StepTitle Component
@@ -229,7 +229,7 @@ const StepperIndicators: FC = () => {
     useStepper();
 
   return (
-    <div className="stepper-indicators flex justify-between mb-8 relative">
+    <div className="stepper-indicators mx-auto max-w-md md:max-w-3xl flex justify-between mb-8 relative">
       {/* Connector line */}
       <div className="absolute top-4 left-0 right-0 h-0.5 bg-blue-200 z-10" />
 
