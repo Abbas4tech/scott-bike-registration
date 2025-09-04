@@ -1,18 +1,6 @@
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import { BikeRegistrationFormData } from "../model/schema";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { useStepper } from "@/components/ui/stepper";
-import { cn } from "@/lib/utils";
 import {
   Popover,
   PopoverTrigger,
@@ -20,9 +8,23 @@ import {
 } from "@radix-ui/react-popover";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+
+import { Button } from "@/components/ui/button";
+import { useStepper } from "@/components/ui/stepper";
+import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { Calendar } from "@/components/ui/calendar";
 
-const BikeInformation = () => {
+import { BikeRegistrationFormData } from "../model/schema";
+
+const BikeInformation = (): React.JSX.Element => {
   const { control, watch } = useFormContext<BikeRegistrationFormData>();
 
   // We are here redirecting to previous step on clicking "This is not my bike" button

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { BikeModel } from "@/app/registeration/model/types";
 
 const mockData: BikeModel[] = [
@@ -30,9 +31,10 @@ const mockData: BikeModel[] = [
 ];
 
 // Helper function to fake delay from loading data from db
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number): Promise<unknown> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<Response> {
   try {
     const { serialNumber } = await request.json();
 
@@ -69,6 +71,7 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (err) {
+    console.error(err);
     return NextResponse.json(
       { error: "Internal server error", status_code: 500 },
       {

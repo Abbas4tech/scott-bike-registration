@@ -1,5 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+
 import { BASE_URL } from "@/lib/utils";
+
 import { BikeModel } from "../model/types";
 
 export type SerialNumberRequest = { serialNumber: string };

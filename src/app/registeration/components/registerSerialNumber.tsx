@@ -1,4 +1,8 @@
 "use client";
+import { useFormContext } from "react-hook-form";
+import { JSX } from "react";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+
 import { Button } from "@/components/ui/button";
 import {
   FormField,
@@ -9,14 +13,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useStepper } from "@/components/ui/stepper";
+
 import {
   BikeRegistrationFormData,
   bikeRegisterationInitialData,
 } from "../model/schema";
-import { useFormContext } from "react-hook-form";
 import { useVerifySerialNumberMutation } from "../services/serialNumberApi";
 
-const RegisterSerielNumber = () => {
+const RegisterSerielNumber = (): JSX.Element => {
   const { setStepCompleted, nextStep } = useStepper();
 
   const { control, watch, setError, reset } =
@@ -27,16 +31,19 @@ const RegisterSerielNumber = () => {
   const [verifySerialNumber, { isLoading }] = useVerifySerialNumberMutation();
   const isDisabled = !sn || isLoading;
 
-  const submithandler = async () => {
+  const submithandler = async (): Promise<void> => {
     try {
       const res = await verifySerialNumber({ serialNumber: sn }).unwrap();
       reset({ ...bikeRegisterationInitialData, ...res.data });
 
       setStepCompleted(0, true);
       nextStep();
-    } catch (error: any) {
-      console.error(error);
-      setError("serialNumber", { message: error?.data.error });
+    } catch (err) {
+      console.error(err);
+      const { error } = (err as FetchBaseQueryError).data as {
+        error: string;
+      };
+      setError("serialNumber", { message: error });
     }
   };
 

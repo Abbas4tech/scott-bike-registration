@@ -1,13 +1,15 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { type BikeRegistrationFormData } from "../model/schema";
+
 import { BASE_URL } from "@/lib/utils";
+
+import { type BikeRegistrationFormData } from "../model/schema";
 
 export const bikeRegistrationApi = createApi({
   reducerPath: "bikeRegistrationApi",
   baseQuery: fetchBaseQuery({ baseUrl: BASE_URL }),
   endpoints: (builder) => ({
     registerBike: builder.mutation<
-      { success: boolean; id?: string; message?: string; payload?: any },
+      { success: boolean; id?: string; message: string; payload?: unknown },
       BikeRegistrationFormData
     >({
       query: (body) => {

@@ -1,6 +1,7 @@
+import { configureStore } from "@reduxjs/toolkit";
+
 import bikeRegistrationApi from "@/app/registeration/services/bikeRegisterationApi";
 import serialNumberApi from "@/app/registeration/services/serialNumberApi";
-import { configureStore } from "@reduxjs/toolkit";
 
 export const store = configureStore({
   reducer: {

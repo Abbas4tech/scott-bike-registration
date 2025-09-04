@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { bikeRegistrationSchema } from "@/app/registeration/model/schema";
 
 // Helper function to fake delay from loading data from db
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number): Promise<unknown> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
 
@@ -39,7 +41,11 @@ export async function POST(req: NextRequest) {
 
     if (shouldFail) {
       return NextResponse.json(
-        { success: false, message: "Registration failed (simulated)." },
+        {
+          success: false,
+          message:
+            "Registration failed (simulated). Please contact our Support.",
+        },
         { status: 409 }
       );
     }
@@ -56,15 +62,14 @@ export async function POST(req: NextRequest) {
       {
         success: true,
         id: registrationId,
-        message: "Registration successful.",
+        message:
+          "Your bike has been successfully registered. You will receive a confirmation email shortly.",
         payload: { serialNumber: data.serialNumber, email: data.email },
       },
       { status: 201 }
     );
-  } catch (err: any) {
-    return NextResponse.json(
-      { success: false, message: err?.message ?? "Invalid request" },
-      { status: 400 }
-    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Invalid Request";
+    return NextResponse.json({ success: false, message }, { status: 400 });
   }
 }

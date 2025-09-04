@@ -1,5 +1,4 @@
 "use client";
-import { cn } from "@/lib/utils";
 import React, {
   createContext,
   useContext,
@@ -12,23 +11,25 @@ import React, {
   useCallback,
 } from "react";
 
+import { cn } from "@/lib/utils";
+
 interface StepperContextType {
   activeStep: number;
   steps: number;
   nextStep: () => void;
   prevStep: () => void;
-  goToStep: (step: number) => void;
-  isStepCompleted: (step: number) => boolean;
-  setStepCompleted: (step: number, completed: boolean) => void;
+  goToStep: (_step: number) => void;
+  isStepCompleted: (_step: number) => boolean;
+  setStepCompleted: (_step: number, _completed: boolean) => void;
   isLastStep: boolean;
   isFirstStep: boolean;
-  registerStep: (index: number) => void;
+  registerStep: (_index: number) => void;
   isStepsAccessible: boolean;
 }
 
 const StepperContext = createContext<StepperContextType | undefined>(undefined);
 
-const useStepper = () => {
+const useStepper = (): StepperContextType => {
   const context = useContext(StepperContext);
   if (!context) {
     throw new Error("useStepper must be used within a StepperProvider");
@@ -72,22 +73,26 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
     });
   }, []);
 
-  const nextStep = () => {
+  const nextStep = (): void => {
     if (!isLastStep) {
       setActiveStep((prev) => Math.min(prev + 1, Math.max(0, steps - 1)));
     }
   };
 
-  const prevStep = () => {
+  const prevStep = (): void => {
     // If steps are not accessible (forward-only mode), prev should be a no-op.
-    if (!isStepsAccessible) return;
+    if (!isStepsAccessible) {
+      return;
+    }
     if (!isFirstStep) {
       setActiveStep((prev) => Math.max(prev - 1, 0));
     }
   };
 
-  const goToStep = (step: number) => {
-    if (step < 0 || step >= steps) return;
+  const goToStep = (step: number): void => {
+    if (step < 0 || step >= steps) {
+      return;
+    }
 
     if (isStepsAccessible) {
       // original behavior: allow navigation to completed steps, first step or going back
@@ -104,11 +109,9 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
     }
   };
 
-  const isStepCompleted = (step: number) => {
-    return !!completedSteps[step];
-  };
+  const isStepCompleted = (step: number): boolean => !!completedSteps[step];
 
-  const setStepCompleted = (step: number, completed: boolean) => {
+  const setStepCompleted = (step: number, completed: boolean): void => {
     setCompletedSteps((prev) => ({
       ...prev,
       [step]: completed,
@@ -163,29 +166,29 @@ type StepTitleProps = HTMLAttributes<HTMLHeadingElement> & {
 const StepTitle: FC<StepTitleProps> = forwardRef<
   HTMLHeadingElement,
   StepTitleProps
->(({ children, stepNumber, className, ...res }, ref) => {
-  return (
-    <h2 ref={ref} {...res} className={cn("text-xl font-semibold", className)}>
-      {stepNumber !== undefined && (
-        <span className="step-number">STEP {stepNumber + 1}: </span>
-      )}
-      <span>{children}</span>
-    </h2>
-  );
-});
+>(({ children, stepNumber, className, ...res }, ref) => (
+  <h2 ref={ref} {...res} className={cn("text-xl font-semibold", className)}>
+    {stepNumber !== undefined && (
+      <span className="step-number">STEP {stepNumber + 1}: </span>
+    )}
+    <span>{children}</span>
+  </h2>
+));
+
+StepTitle.displayName = "StepTitle";
 
 const StepContent: FC<PropsWithChildren> = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement>
->(({ className, ...res }, ref) => {
-  return (
-    <div
-      ref={ref}
-      {...res}
-      className={cn("step-content-inner mt-4", className)}
-    />
-  );
-});
+>(({ className, ...res }, ref) => (
+  <div
+    ref={ref}
+    {...res}
+    className={cn("step-content-inner mt-4", className)}
+  />
+));
+
+StepContent.displayName = "StepContent";
 
 // Stepper Navigation Component
 const StepperNavigation: FC = () => {
@@ -228,7 +231,7 @@ const StepperIndicators: FC = () => {
   return (
     <div className="stepper-indicators flex justify-between mb-8 relative">
       {/* Connector line */}
-      <div className="absolute top-4 left-0 right-0 h-0.5 bg-blue-200 z-10"></div>
+      <div className="absolute top-4 left-0 right-0 h-0.5 bg-blue-200 z-10" />
 
       {Array.from({ length: steps }).map((_, index) => {
         const completed = isStepCompleted(index);
@@ -268,14 +271,12 @@ const StepperIndicators: FC = () => {
   );
 };
 
-export const Stepper: FC<PropsWithChildren> = ({ children }) => {
-  return (
-    <>
-      <StepperIndicators />
-      {children}
-    </>
-  );
-};
+export const Stepper: FC<PropsWithChildren> = ({ children }) => (
+  <>
+    <StepperIndicators />
+    {children}
+  </>
+);
 
 export {
   Step,
