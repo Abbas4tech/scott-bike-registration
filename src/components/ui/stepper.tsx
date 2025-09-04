@@ -12,7 +12,6 @@ import React, {
   useCallback,
 } from "react";
 
-// Stepper Context
 interface StepperContextType {
   activeStep: number;
   steps: number;
@@ -24,6 +23,7 @@ interface StepperContextType {
   isLastStep: boolean;
   isFirstStep: boolean;
   registerStep: (index: number) => void;
+  isStepsAccessible: boolean;
 }
 
 const StepperContext = createContext<StepperContextType | undefined>(undefined);
@@ -39,11 +39,17 @@ const useStepper = () => {
 // Stepper Provider
 type StepperProviderProps = {
   defaultStep?: number;
+  /**
+   * If true: completed steps (and going back) are accessible (default / original behavior).
+   * If false: user can only move forward (prev is disabled and indicators only allow advancing to next step).
+   */
+  isStepsAccessible?: boolean;
 };
 
 const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
   children,
   defaultStep = 0,
+  isStepsAccessible = true,
 }) => {
   const [activeStep, setActiveStep] = useState(defaultStep);
   const [completedSteps, setCompletedSteps] = useState<Record<number, boolean>>(
@@ -68,22 +74,33 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
 
   const nextStep = () => {
     if (!isLastStep) {
-      setActiveStep((prev) => prev + 1);
+      setActiveStep((prev) => Math.min(prev + 1, Math.max(0, steps - 1)));
     }
   };
 
   const prevStep = () => {
+    // If steps are not accessible (forward-only mode), prev should be a no-op.
+    if (!isStepsAccessible) return;
     if (!isFirstStep) {
-      setActiveStep((prev) => prev - 1);
+      setActiveStep((prev) => Math.max(prev - 1, 0));
     }
   };
 
   const goToStep = (step: number) => {
-    // Only allow navigation to completed steps or the next available step
-    const canNavigate =
-      step === 0 || completedSteps[step - 1] || step < activeStep;
-    if (canNavigate && step >= 0 && step < steps) {
-      setActiveStep(step);
+    if (step < 0 || step >= steps) return;
+
+    if (isStepsAccessible) {
+      // original behavior: allow navigation to completed steps, first step or going back
+      const canNavigate =
+        step === 0 || completedSteps[step - 1] || step < activeStep;
+      if (canNavigate) {
+        setActiveStep(step);
+      }
+    } else {
+      // forward-only mode: only allow moving to the immediate next step (or stay on current)
+      if (step === activeStep + 1) {
+        setActiveStep(step);
+      }
     }
   };
 
@@ -111,6 +128,7 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
         isLastStep,
         isFirstStep,
         registerStep,
+        isStepsAccessible,
       }}
     >
       {children}
@@ -178,13 +196,14 @@ const StepperNavigation: FC = () => {
     isFirstStep,
     activeStep,
     isStepCompleted,
+    isStepsAccessible,
   } = useStepper();
 
   return (
     <div className="stepper-navigation flex justify-between mt-8">
       <button
         onClick={prevStep}
-        disabled={isFirstStep}
+        disabled={isFirstStep || !isStepsAccessible}
         className="px-4 py-2 bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Previous
@@ -203,7 +222,8 @@ const StepperNavigation: FC = () => {
 
 // Stepper Indicators Component
 const StepperIndicators: FC = () => {
-  const { steps, activeStep, goToStep, isStepCompleted } = useStepper();
+  const { steps, activeStep, goToStep, isStepCompleted, isStepsAccessible } =
+    useStepper();
 
   return (
     <div className="stepper-indicators flex justify-between mb-8 relative">
@@ -213,10 +233,17 @@ const StepperIndicators: FC = () => {
       {Array.from({ length: steps }).map((_, index) => {
         const completed = isStepCompleted(index);
         const active = index === activeStep;
-        const accessible = index === 0 || isStepCompleted(index - 1);
+
+        const accessible = isStepsAccessible
+          ? index === 0 || isStepCompleted(index - 1) || index < activeStep
+          : index === activeStep + 1; // forward-only mode: only immediate next step is clickable
 
         return (
-          <div key={index} className="flex flex-col items-center relative z-10">
+          <div
+            key={index}
+            className="flex flex-col items-center relative z-10"
+            aria-current={active ? "step" : undefined}
+          >
             <button
               type="button"
               onClick={() => accessible && goToStep(index)}
@@ -230,6 +257,7 @@ const StepperIndicators: FC = () => {
                   ? "border-gray-300 bg-white text-gray-500"
                   : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
               }`}
+              aria-label={`Go to step ${index + 1}`}
             >
               {completed ? "✓" : index + 1}
             </button>

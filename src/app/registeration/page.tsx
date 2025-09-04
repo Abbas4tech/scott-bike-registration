@@ -9,7 +9,7 @@ const BikeRegistrationPage = () => {
         BIKE REGISTRATION
       </h1>
 
-      <StepperProvider defaultStep={0}>
+      <StepperProvider isStepsAccessible={false} defaultStep={0}>
         <BikeRegisterationForm />
       </StepperProvider>
     </div>

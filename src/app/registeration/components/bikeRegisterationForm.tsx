@@ -18,6 +18,7 @@ import {
   bikeRegisterationInitialData,
 } from "../model/schema";
 import { CircleCheckBigIcon } from "lucide-react";
+import { useRegisterBikeMutation } from "../services/bikeRegisterationApi";
 
 const BikeRegisterationForm = () => {
   const form = useForm<BikeRegistrationFormData>({
@@ -28,12 +29,22 @@ const BikeRegisterationForm = () => {
 
   const { setStepCompleted, nextStep } = useStepper();
 
-  const submitHandler: SubmitHandler<BikeRegistrationFormData> = (d) => {
-    const isValidData = bikeRegistrationSchema.safeParse(d).success;
-    console.log(d, isValidData);
-    if (!isValidData) return;
-    setStepCompleted(2, true);
-    nextStep();
+  const [registerBike, { isLoading }] = useRegisterBikeMutation();
+
+  const submitHandler: SubmitHandler<BikeRegistrationFormData> = async (d) => {
+    try {
+      const isValidData = bikeRegistrationSchema.safeParse(d).success;
+      console.log(d, isValidData);
+      if (!isValidData) return;
+
+      const res = await registerBike(d).unwrap();
+      console.log(res);
+
+      setStepCompleted(2, true);
+      nextStep();
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <Form {...form}>
