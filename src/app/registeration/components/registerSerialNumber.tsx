@@ -9,24 +9,29 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useStepper } from "@/components/ui/stepper";
-import { BikeRegistrationFormData } from "../model/schema";
+import {
+  BikeRegistrationFormData,
+  bikeRegisterationInitialData,
+} from "../model/schema";
 import { useFormContext } from "react-hook-form";
 import { useVerifySerialNumberMutation } from "../services/serialNumberApi";
 
 const RegisterSerielNumber = () => {
   const { setStepCompleted, nextStep } = useStepper();
 
-  const { control, watch, setError } =
+  const { control, watch, setError, reset } =
     useFormContext<BikeRegistrationFormData>();
 
-  const serialNumber = watch("serialNumber");
+  const sn = watch("serialNumber");
 
   const [verifySerialNumber, { isLoading }] = useVerifySerialNumberMutation();
-  const isDisabled = !serialNumber || isLoading;
+  const isDisabled = !sn || isLoading;
 
   const submithandler = async () => {
     try {
-      const res = await verifySerialNumber({ serialNumber }).unwrap();
+      const res = await verifySerialNumber({ serialNumber: sn }).unwrap();
+      reset({ ...bikeRegisterationInitialData, ...res.data });
+
       setStepCompleted(0, true);
       nextStep();
     } catch (error: any) {

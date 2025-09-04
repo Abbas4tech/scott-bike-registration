@@ -4,24 +4,44 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { BikeRegistrationFormData } from "../model/schema";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { useStepper } from "@/components/ui/stepper";
+import { cn } from "@/lib/utils";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@radix-ui/react-popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
 
 const BikeInformation = () => {
-  const { control } = useFormContext<BikeRegistrationFormData>();
+  const { control, watch } = useFormContext<BikeRegistrationFormData>();
+
+  // We are here redirecting to previous step on clicking "This is not my bike" button
+  // In actual scenario it will trigger a different form scenario
+  const { prevStep, nextStep, setStepCompleted } = useStepper();
+
+  const dop = watch("dateOfPurchase");
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4">
         <FormField
+          disabled
           control={control}
-          name="firstName"
+          name="serialNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>First Name</FormLabel>
+              <FormLabel>Serial Number</FormLabel>
               <FormControl>
                 <Input placeholder="Enter first name!" {...field} />
               </FormControl>
@@ -29,25 +49,106 @@ const BikeInformation = () => {
             </FormItem>
           )}
         />
-        <div>
-          <p className="text-sm text-gray-500">Serial Number</p>
-          <p className="font-medium">{"STM34D30L24110132N"}</p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-500">Model Description</p>
-          <p className="font-medium">Bike Spark RC World Cup (EU) IGPG/L</p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-500">Shop Name</p>
-          <p className="font-medium">BM SPORTECH IB SL</p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-500">Date of purchase</p>
-          <p className="font-medium">25/07/2025</p>
-        </div>
+        <Image
+          width={400}
+          height={400}
+          alt="Bike"
+          className="object-fit border"
+          src={"/assets/SCR29A20M24110345N.jpg"}
+        />
+        <FormField
+          control={control}
+          disabled
+          name="modelDescription"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Model Description</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter first name!" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          disabled
+          name="shopName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Shop Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter first name!" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name="dateOfPurchase"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date of Purchase</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal lowercase",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date > new Date() || date < new Date("1900-01-01")
+                    }
+                    captionLayout="dropdown"
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
 
-      <button className="text-blue-600 text-sm">THIS IS NOT MY BIKE</button>
+      <div className="flex justify-end gap-4 mt-4">
+        <Button
+          variant={"link"}
+          type="button"
+          onClick={prevStep}
+          className="text-blue-600 text-sm"
+        >
+          THIS IS NOT MY BIKE
+        </Button>
+
+        <Button
+          disabled={!dop}
+          onClick={() => {
+            setStepCompleted(1, true);
+            nextStep();
+          }}
+          variant={"default"}
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 };
