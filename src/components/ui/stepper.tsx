@@ -7,9 +7,9 @@ import React, {
   HTMLAttributes,
   forwardRef,
   PropsWithChildren,
-  isValidElement,
-  Children,
+  useEffect,
   FC,
+  useCallback,
 } from "react";
 
 // Stepper Context
@@ -23,6 +23,7 @@ interface StepperContextType {
   setStepCompleted: (step: number, completed: boolean) => void;
   isLastStep: boolean;
   isFirstStep: boolean;
+  registerStep: (index: number) => void;
 }
 
 const StepperContext = createContext<StepperContextType | undefined>(undefined);
@@ -48,14 +49,22 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
   const [completedSteps, setCompletedSteps] = useState<Record<number, boolean>>(
     {}
   );
+  const [stepIndexes, setStepIndexes] = useState<number[]>([]);
 
-  // Count the number of steps by checking children
-  const steps = Children.toArray(children).filter(
-    (child) => isValidElement(child) && child.type === Step
-  ).length;
+  const steps = stepIndexes.length;
 
   const isLastStep = activeStep === steps - 1;
   const isFirstStep = activeStep === 0;
+
+  // Use useCallback to memoize the registerStep function
+  const registerStep = useCallback((index: number) => {
+    setStepIndexes((prev) => {
+      if (!prev.includes(index)) {
+        return [...prev, index].sort((a, b) => a - b);
+      }
+      return prev;
+    });
+  }, []);
 
   const nextStep = () => {
     if (!isLastStep) {
@@ -101,6 +110,7 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
         setStepCompleted,
         isLastStep,
         isFirstStep,
+        registerStep,
       }}
     >
       {children}
@@ -110,11 +120,16 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
 
 // Step Component
 interface StepProps {
-  index?: number;
+  index: number;
 }
 
-const Step: FC<PropsWithChildren<StepProps>> = ({ children, index = 0 }) => {
-  const { activeStep } = useStepper();
+const Step: FC<PropsWithChildren<StepProps>> = ({ children, index }) => {
+  const { activeStep, registerStep } = useStepper();
+
+  // Register step only once on mount
+  useEffect(() => {
+    registerStep(index);
+  }, [index, registerStep]);
 
   if (activeStep !== index) {
     return null;
@@ -222,6 +237,15 @@ const StepperIndicators: FC = () => {
         );
       })}
     </div>
+  );
+};
+
+export const Stepper: FC<PropsWithChildren> = ({ children }) => {
+  return (
+    <>
+      <StepperIndicators />
+      {children}
+    </>
   );
 };
 

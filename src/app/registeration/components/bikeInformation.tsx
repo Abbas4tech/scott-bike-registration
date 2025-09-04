@@ -4,7 +4,6 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import React from "react";
@@ -36,14 +35,13 @@ const BikeInformation = () => {
     <div className="space-y-6">
       <div className="flex flex-col gap-4">
         <FormField
-          disabled
           control={control}
           name="serialNumber"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Serial Number</FormLabel>
               <FormControl>
-                <Input placeholder="Enter first name!" {...field} />
+                <Input disabled placeholder="Enter first name!" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -58,13 +56,12 @@ const BikeInformation = () => {
         />
         <FormField
           control={control}
-          disabled
           name="modelDescription"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Model Description</FormLabel>
               <FormControl>
-                <Input placeholder="Enter first name!" {...field} />
+                <Input disabled placeholder="Enter first name!" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -72,13 +69,12 @@ const BikeInformation = () => {
         />
         <FormField
           control={control}
-          disabled
           name="shopName"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Shop Name</FormLabel>
               <FormControl>
-                <Input placeholder="Enter first name!" {...field} />
+                <Input disabled placeholder="Enter first name!" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -97,7 +93,7 @@ const BikeInformation = () => {
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "w-[240px] pl-3 text-left font-normal lowercase",
+                        "w-[240px] pl-3 text-left font-normal capitalize",
                         !field.value && "text-muted-foreground"
                       )}
                     >
