@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { BanIcon, CircleCheckBigIcon } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import Image from "next/image";
 
 import { Form } from "@/components/ui/form";
 import {
@@ -12,7 +12,6 @@ import {
   StepContent,
   useStepper,
 } from "@/components/ui/stepper";
-import { cn } from "@/lib/utils";
 
 import BikeInformation from "./bikeInformation";
 import PersonalInformation from "./personalInformation";
@@ -23,6 +22,7 @@ import {
   bikeRegisterationInitialData,
 } from "../model/schema";
 import { useRegisterBikeMutation } from "../services/bikeRegisterationApi";
+import RegisterationConfirmation from "./registerationConfirmation";
 
 const BikeRegisterationForm = (): React.JSX.Element => {
   const [confirmation, setConfirmation] = useState<{
@@ -66,14 +66,21 @@ const BikeRegisterationForm = (): React.JSX.Element => {
       nextStep();
     }
   };
+
+  const stepLabels = [
+    "Serial number",
+    "Bike information",
+    "Personal information",
+    "Registration confirmation",
+  ];
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(submitHandler)}>
-        <StepperIndicators />
+        <StepperIndicators labels={stepLabels} />
 
         <Step index={0}>
           <StepTitle
-            className="text-2xl md:text-3xl font-bold tracking-wider"
+            className="text-2xl text-neutral-500 md:text-3xl font-brandon font-extrabold tracking-wider"
             stepNumber={0}
           >
             SERIAL NUMBER
@@ -85,7 +92,7 @@ const BikeRegisterationForm = (): React.JSX.Element => {
 
         <Step index={1}>
           <StepTitle
-            className="text-2xl md:text-3xl font-bold tracking-wider"
+            className="text-2xl text-neutral-500 md:text-3xl font-extrabold font-brandon tracking-wider"
             stepNumber={1}
           >
             BIKE INFORMATION
@@ -96,8 +103,20 @@ const BikeRegisterationForm = (): React.JSX.Element => {
         </Step>
 
         <Step index={2}>
+          <div className="flex my-4 gap-4 items-center">
+            <Image
+              width={150}
+              height={150}
+              src={`/assets/${form.getValues("serialNumber")}.jpg`}
+              className="border border-neutral-300"
+              alt="Bike"
+            />
+            <p className="font-bold text-lg">
+              {form.getValues("modelDescription")}
+            </p>
+          </div>
           <StepTitle
-            className="text-2xl md:text-3xl font-bold tracking-wider"
+            className="text-2xl font-brandon text-neutral-500 md:text-3xl font-extrabold tracking-wider"
             stepNumber={2}
           >
             PERSONAL INFORMATION
@@ -109,36 +128,18 @@ const BikeRegisterationForm = (): React.JSX.Element => {
 
         <Step index={3}>
           <StepTitle
-            className="text-2xl md:text-3xl font-bold tracking-wider"
+            className="text-2xl font-brandon text-neutral-500 md:text-3xl font-extrabold tracking-wider"
             stepNumber={3}
           >
             REGISTRATION CONFIRMATION
           </StepTitle>
           <StepContent>
-            <div className="text-center py-10">
-              <div
-                className={cn(
-                  "w-24 h-24  rounded-full flex items-center justify-center mx-auto mb-4",
-                  confirmation.success ? "bg-green-100" : "bg-red-100"
-                )}
-              >
-                {confirmation.success ? (
-                  <CircleCheckBigIcon size={50} className="text-green-600" />
-                ) : (
-                  <BanIcon size={50} className="text-red-600" />
-                )}
-              </div>
-              <h2 className="text-2xl font-bold mb-2">
-                {confirmation.success
-                  ? " Registration Complete!"
-                  : " Registration Failed!"}
-              </h2>
-              <p className="text-gray-600">{confirmation.message}</p>
-            </div>
+            <RegisterationConfirmation
+              message={confirmation.message}
+              success={confirmation.success}
+            />
           </StepContent>
         </Step>
-
-        {/* <StepperNavigation /> */}
       </form>
     </Form>
   );
