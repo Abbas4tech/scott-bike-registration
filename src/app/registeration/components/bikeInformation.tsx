@@ -74,6 +74,20 @@ const BikeInformation = (): React.JSX.Element => {
           )}
         />
 
+        <FormField
+          control={control}
+          name="shopName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel aria-disabled="true">Shop Name</FormLabel>
+              <FormControl>
+                <Input disabled placeholder="Enter first name!" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {/* Date of Purchase Selection */}
         <FormField
           control={control}
