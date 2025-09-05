@@ -13,31 +13,22 @@ import React, {
 
 import { cn } from "@/lib/utils";
 
-/**
- * Interface defining the shape of the stepper context
- * Provides methods and state for managing multi-step forms
- */
 interface StepperContextType {
-  activeStep: number; // Current active step index
-  steps: number; // Total number of steps
-  nextStep: () => void; // Function to move to next step
-  prevStep: () => void; // Function to move to previous step
-  goToStep: (_step: number) => void; // Function to jump to specific step
-  isStepCompleted: (_step: number) => boolean; // Check if step is completed
-  setStepCompleted: (_step: number, _completed: boolean) => void; // Mark step completion
-  isLastStep: boolean; // Whether current step is the last one
-  isFirstStep: boolean; // Whether current step is the first one
-  registerStep: (_index: number) => void; // Register a step with the stepper
-  isStepsAccessible: boolean; // Whether steps can be navigated freely
+  activeStep: number;
+  steps: number;
+  nextStep: () => void;
+  prevStep: () => void;
+  goToStep: (_step: number) => void;
+  isStepCompleted: (_step: number) => boolean;
+  setStepCompleted: (_step: number, _completed: boolean) => void;
+  isLastStep: boolean;
+  isFirstStep: boolean;
+  registerStep: (_index: number) => void;
+  isIndicatorButtonsAccessible: boolean; // Renamed for clarity
 }
 
-// Create context for stepper with undefined initial value
 const StepperContext = createContext<StepperContextType | undefined>(undefined);
 
-/**
- * Custom hook to access stepper context
- * @throws Error if used outside of StepperProvider
- */
 const useStepper = (): StepperContextType => {
   const context = useContext(StepperContext);
   if (!context) {
@@ -50,20 +41,16 @@ const useStepper = (): StepperContextType => {
 type StepperProviderProps = {
   defaultStep?: number;
   /**
-   * If true: completed steps (and going back) are accessible (default / original behavior).
-   * If false: user can only move forward (prev is disabled and indicators only allow advancing to next step).
+   * If true: indicator buttons are clickable for navigation (default behavior).
+   * If false: indicator buttons are disabled, navigation must be done programmatically.
    */
-  isStepsAccessible?: boolean;
+  isIndicatorButtonsAccessible?: boolean; // Renamed for clarity
 };
 
-/**
- * Provider component that manages stepper state and provides context to child components
- * Handles step registration, navigation, and completion status
- */
 const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
   children,
   defaultStep = 0,
-  isStepsAccessible = true,
+  isIndicatorButtonsAccessible = true, // Renamed for clarity
 }) => {
   const [activeStep, setActiveStep] = useState(defaultStep);
   const [completedSteps, setCompletedSteps] = useState<Record<number, boolean>>(
@@ -75,10 +62,6 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
   const isLastStep = activeStep === steps - 1;
   const isFirstStep = activeStep === 0;
 
-  /**
-   * Registers a step with the stepper system
-   * Ensures steps are stored in sorted order
-   */
   const registerStep = useCallback((index: number) => {
     setStepIndexes((prev) => {
       if (!prev.includes(index)) {
@@ -88,54 +71,27 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
     });
   }, []);
 
-  /**
-   * Advances to the next step if not at the last step
-   */
   const nextStep = (): void => {
     if (!isLastStep) {
       setActiveStep((prev) => Math.min(prev + 1, Math.max(0, steps - 1)));
     }
   };
 
-  /**
-   * Returns to the previous step if not at the first step
-   * Respects the isStepsAccessible setting
-   */
   const prevStep = (): void => {
-    // If steps are not accessible (forward-only mode), prev should be a no-op.
-    if (!isStepsAccessible) {
-      return;
-    }
     if (!isFirstStep) {
       setActiveStep((prev) => Math.max(prev - 1, 0));
     }
   };
 
-  /**
-   * Jumps to a specific step with bounds checking
-   * Respects the isStepsAccessible setting for forward-only navigation
-   */
   const goToStep = (step: number): void => {
     if (step < 0 || step >= steps) {
       return;
     }
-
-    if (!isStepsAccessible) {
-      // forward-only mode: only allow moving to the immediate next step
-      if (step === activeStep + 1 && isStepCompleted(activeStep)) {
-        setActiveStep(step);
-      }
-    }
+    setActiveStep(step);
   };
 
-  /**
-   * Checks if a specific step has been marked as completed
-   */
   const isStepCompleted = (step: number): boolean => !!completedSteps[step];
 
-  /**
-   * Marks a step as completed or not completed
-   */
   const setStepCompleted = (step: number, completed: boolean): void => {
     setCompletedSteps((prev) => ({
       ...prev,
@@ -156,7 +112,7 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
         isLastStep,
         isFirstStep,
         registerStep,
-        isStepsAccessible,
+        isIndicatorButtonsAccessible, // Renamed for clarity
       }}
     >
       {children}
@@ -164,19 +120,14 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
   );
 };
 
-// Step Component
+// Step Component (unchanged)
 interface StepProps {
   index: number;
 }
 
-/**
- * Step component that only renders its children when it's the active step
- * Automatically registers itself with the stepper system
- */
 const Step: FC<PropsWithChildren<StepProps>> = ({ children, index }) => {
   const { activeStep, registerStep } = useStepper();
 
-  // Register step only once on mount
   useEffect(() => {
     registerStep(index);
   }, [index, registerStep]);
@@ -188,14 +139,11 @@ const Step: FC<PropsWithChildren<StepProps>> = ({ children, index }) => {
   return <div className="step contaienr max-w-lg mx-auto">{children}</div>;
 };
 
-// StepTitle Component
+// StepTitle Component (unchanged)
 type StepTitleProps = HTMLAttributes<HTMLHeadingElement> & {
   stepNumber?: number;
 };
 
-/**
- * Component for displaying step titles with optional step numbering
- */
 const StepTitle: FC<StepTitleProps> = forwardRef<
   HTMLHeadingElement,
   StepTitleProps
@@ -210,9 +158,6 @@ const StepTitle: FC<StepTitleProps> = forwardRef<
 
 StepTitle.displayName = "StepTitle";
 
-/**
- * Container component for step content
- */
 const StepContent: FC<PropsWithChildren> = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement>
@@ -226,11 +171,7 @@ const StepContent: FC<PropsWithChildren> = forwardRef<
 
 StepContent.displayName = "StepContent";
 
-// Stepper Navigation Component
-/**
- * Navigation component with Previous and Next buttons
- * Respects step accessibility settings and completion status
- */
+// Stepper Navigation Component (unchanged)
 const StepperNavigation: FC = () => {
   const {
     nextStep,
@@ -239,14 +180,13 @@ const StepperNavigation: FC = () => {
     isFirstStep,
     activeStep,
     isStepCompleted,
-    isStepsAccessible,
   } = useStepper();
 
   return (
     <div className="stepper-navigation flex justify-between mt-8">
       <button
         onClick={prevStep}
-        disabled={isFirstStep || !isStepsAccessible}
+        disabled={isFirstStep}
         className="px-4 py-2 bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Previous
@@ -268,15 +208,15 @@ type StepIndicatorProps = {
   labels: string[];
 };
 
-/**
- * Visual indicator component showing progress through steps
- * Shows labels and allows navigation between steps based on accessibility settings
- */
 const StepperIndicators: FC<StepIndicatorProps> = ({ labels }) => {
-  const { steps, activeStep, goToStep, isStepCompleted, isStepsAccessible } =
-    useStepper();
+  const {
+    steps,
+    activeStep,
+    goToStep,
+    isStepCompleted,
+    isIndicatorButtonsAccessible,
+  } = useStepper(); // Use renamed prop
 
-  // Validate that labels match the number of steps
   if (labels.length !== steps) {
     console.error("Labels of Indicator must be equal to steps");
     return null;
@@ -284,34 +224,24 @@ const StepperIndicators: FC<StepIndicatorProps> = ({ labels }) => {
 
   return (
     <div className="stepper-indicators mx-auto max-w-md md:max-w-3xl flex justify-between mb-8 md:mb-16 relative">
-      {/* Connector line */}
       <div className="absolute top-16 left-0 right-0 h-1 rounded bg-muted z-10" />
 
       {Array.from({ length: steps }).map((_, index) => {
-        const completed = isStepCompleted(index);
         const active = index === activeStep;
 
-        // Determine step accessibility based on mode
-        const accessible = isStepsAccessible
-          ? index === 0 || isStepCompleted(index - 1) || index < activeStep
-          : index === activeStep + 1 && isStepCompleted(activeStep);
+        // Always allow navigation programmatically, but disable indicator buttons if specified
+        const accessible =
+          isIndicatorButtonsAccessible &&
+          (index === 0 || isStepCompleted(index - 1) || index < activeStep);
 
-        // Determine styling based on step state and accessibility mode
-        const indicatorClasses = isStepsAccessible
-          ? `${
-              active
-                ? "border-blue-500 bg-blue-500 text-white cursor-pointer"
-                : completed
-                ? "border-green-500 bg-green-500 text-white cursor-pointer"
-                : accessible
-                ? "border-gray-300 bg-white text-gray-500 cursor-pointer"
-                : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
-            }`
-          : `${
-              active
-                ? "border-blue-500 bg-blue-500 text-white cursor-pointer"
-                : "border-muted bg-muted text-gray-500 cursor-not-allowed"
-            }`;
+        const indicatorClasses = `
+          ${
+            active
+              ? "border-blue-500 bg-blue-500 text-white"
+              : "border-gray-200 bg-gray-100 text-gray-400"
+          }
+          ${accessible ? "cursor-pointer" : "cursor-not-allowed"}
+        `;
 
         return (
           <div
