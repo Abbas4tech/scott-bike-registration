@@ -1,7 +1,6 @@
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import React, { useMemo, memo } from "react";
-import { useFormContext } from "react-hook-form";
+import React, { memo } from "react";
 
 import {
   Popover,
@@ -27,33 +26,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useStepper } from "@/components/ui/stepper";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { BikeRegistrationFormData } from "../model/schema";
-
-const COUNTRIES = [
-  { value: "us", label: "United States" },
-  { value: "uk", label: "United Kingdom" },
-  { value: "de", label: "Germany" },
-  { value: "fr", label: "France" },
-  { value: "it", label: "Italy" },
-  { value: "es", label: "Spain" },
-];
-
-const LANGUAGES = [
-  { value: "english", label: "English" },
-  { value: "french", label: "French" },
-  { value: "german", label: "German" },
-  { value: "italian", label: "Italian" },
-  { value: "spanish", label: "Spanish" },
-];
-
-const GENDERS = [
-  { value: "male", label: "Male" },
-  { value: "female", label: "Female" },
-  { value: "other", label: "Other" },
-];
+import { COUNTRIES, LANGUAGES, GENDERS } from "../model/constants";
 
 const TextField = memo(
   ({
@@ -186,7 +162,7 @@ const DatePickerField = memo(() => (
                 size={"xl"}
                 variant="outline"
                 className={cn(
-                  "pl-3 text-left font-normal capitalize justify-start",
+                  "pl-3 text-left font-normal capitalize hover:bg-inherit ring-offset-background justify-start border border-neutral-300 text-muted-foreground",
                   !field.value && "text-muted-foreground"
                 )}
               >
@@ -260,86 +236,45 @@ const CheckboxField = memo(
 
 CheckboxField.displayName = "CheckboxField";
 
-const PersonalInformation = (): React.JSX.Element => {
-  const { prevStep } = useStepper();
-  const form = useFormContext<BikeRegistrationFormData>();
+const PersonalInformation = (): React.JSX.Element => (
+  <div className="space-y-6">
+    <div className="flex flex-col gap-4">
+      <TextField name="firstName" label="First Name" placeholder="First Name" />
 
-  const NavigationButtons = useMemo(
-    () => (
-      <div className="mt-4 flex justify-end">
-        <Button
-          size="lg"
-          variant="link"
-          type="button"
-          onClick={prevStep}
-          className="text-blue-600 text-sm uppercase"
-        >
-          Previous
-        </Button>
-        <Button
-          size="lg"
-          type="submit"
-          disabled={!form.formState.isValid}
-          variant="default"
-        >
-          Submit
-        </Button>
-      </div>
-    ),
-    [prevStep, form.formState.isValid]
-  );
+      <TextField name="lastName" label="Last Name" placeholder="Last Name" />
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4">
-        <TextField
-          name="firstName"
-          label="First Name"
-          placeholder="First Name"
-        />
+      <TextField name="email" label="Email" type="email" placeholder="Email" />
 
-        <TextField name="lastName" label="Last Name" placeholder="Last Name" />
-
-        <TextField
-          name="email"
-          label="Email"
-          type="email"
-          placeholder="Email"
-        />
-
-        <SelectField
-          name="country"
-          label="Country"
-          options={COUNTRIES}
-          placeholder="Select your Country"
-        />
-      </div>
-
-      <RadioGroupField
-        name="preferredLanguage"
-        label="Preferred Language"
-        options={LANGUAGES}
+      <SelectField
+        name="country"
+        label="Country"
+        options={COUNTRIES}
+        placeholder="Select your Country"
       />
-
-      <RadioGroupField name="gender" label="Gender" options={GENDERS} />
-
-      <DatePickerField />
-
-      <CheckboxField
-        name="newsOptIn"
-        label="I agree to receive News and Updates from SCOTT Sports."
-      />
-
-      <CheckboxField
-        name="consent"
-        label="I have read and accept the"
-        link="#"
-        linkText="privacy policy."
-      />
-
-      {NavigationButtons}
     </div>
-  );
-};
+
+    <RadioGroupField
+      name="preferredLanguage"
+      label="Preferred Language"
+      options={LANGUAGES}
+    />
+
+    <RadioGroupField name="gender" label="Gender" options={GENDERS} />
+
+    <DatePickerField />
+
+    <CheckboxField
+      name="newsOptIn"
+      label="I agree to receive News and Updates from SCOTT Sports."
+    />
+
+    <CheckboxField
+      name="consent"
+      label="I have read and accept the"
+      link="#"
+      linkText="privacy policy."
+    />
+  </div>
+);
 
 export default memo(PersonalInformation);

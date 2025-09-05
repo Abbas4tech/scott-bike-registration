@@ -1,14 +1,13 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import Image from "next/image";
+import { CalendarIcon, CircleCheck } from "lucide-react";
+import { format } from "date-fns";
+
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@radix-ui/react-popover";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { useStepper } from "@/components/ui/stepper";
 import { cn } from "@/lib/utils";
@@ -19,14 +18,15 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Calendar } from "@/components/ui/calendar";
 
 import { BikeRegistrationFormData } from "../model/schema";
+import BikeInfoCard from "./bikeInfoCard";
 
 const BikeInformation = (): React.JSX.Element => {
-  const { control, watch, getValues } =
-    useFormContext<BikeRegistrationFormData>();
+  const { control, watch } = useFormContext<BikeRegistrationFormData>();
 
   // We are here redirecting to previous step on clicking "This is not my bike" button
   // In actual scenario it will trigger a different form scenario
@@ -47,16 +47,14 @@ const BikeInformation = (): React.JSX.Element => {
                 <Input disabled placeholder="Enter first name!" {...field} />
               </FormControl>
               <FormMessage />
+              <FormDescription className="text-green-500 text-xs items-center flex gap-1 font-bold">
+                <CircleCheck size={14} />
+                Serial Number found
+              </FormDescription>
             </FormItem>
           )}
         />
-        <Image
-          width={400}
-          height={400}
-          alt="Bike"
-          className="object-fit border border-neutral-300"
-          src={`/assets/${getValues("serialNumber")}.jpg`}
-        />
+        <BikeInfoCard imageSize={400} showDescription={false} />
         <FormField
           control={control}
           name="modelDescription"
