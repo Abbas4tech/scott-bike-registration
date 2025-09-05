@@ -1,148 +1,154 @@
-import React, { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, SubmitHandler } from "react-hook-form";
+"use client";
+import React, { useCallback, useMemo, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
-import Image from "next/image";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LoaderCircle } from "lucide-react";
 
 import { Form } from "@/components/ui/form";
 import {
-  StepperIndicators,
   Step,
-  StepTitle,
   StepContent,
+  StepperIndicators,
+  StepTitle,
   useStepper,
 } from "@/components/ui/stepper";
+import { Button } from "@/components/ui/button";
 
-import BikeInformation from "./bikeInformation";
-import PersonalInformation from "./personalInformation";
-import RegisterSerielNumber from "./registerSerialNumber";
 import {
+  bikeRegisterationInitialData,
   BikeRegistrationFormData,
   bikeRegistrationSchema,
-  bikeRegisterationInitialData,
 } from "../model/schema";
 import { useRegisterBikeMutation } from "../services/bikeRegisterationApi";
+import RegisterSerialNumber from "./registerSerialNumber";
+import BikeInformation from "./bikeInformation";
+import PersonalInformation from "./personalInformation";
 import RegisterationConfirmation from "./registerationConfirmation";
+import BikeInfoCard from "./bikeInfoCard";
 
-const BikeRegisterationForm = (): React.JSX.Element => {
-  const [confirmation, setConfirmation] = useState<{
-    success: boolean;
-    message: string;
-  }>({
+/**
+ * Main bike registration form component
+ * Manages multi-step form process and submission
+ */
+const BikeRegistrationForm = (): React.JSX.Element => {
+  const [confirmation, setConfirmation] = useState({
     success: false,
     message: "",
   });
 
+  // Initialize form with validation schema and default values
   const form = useForm<BikeRegistrationFormData>({
     resolver: zodResolver(bikeRegistrationSchema),
     defaultValues: bikeRegisterationInitialData,
     mode: "onChange",
   });
 
-  const { setStepCompleted, nextStep } = useStepper();
+  const { setStepCompleted, nextStep, prevStep } = useStepper();
+  const [registerBike, { isLoading }] = useRegisterBikeMutation();
 
-  const [registerBike] = useRegisterBikeMutation();
+  // Form submission handler
+  const submitHandler = useCallback<SubmitHandler<BikeRegistrationFormData>>(
+    async (data) => {
+      try {
+        const isValidData = bikeRegistrationSchema.safeParse(data).success;
+        if (!isValidData) {
+          return;
+        }
 
-  const submitHandler: SubmitHandler<BikeRegistrationFormData> = async (d) => {
-    try {
-      const isValidData = bikeRegistrationSchema.safeParse(d).success;
-      if (!isValidData) {
-        return;
+        const res = await registerBike(data).unwrap();
+        setConfirmation({ success: res.success, message: res.message });
+      } catch (error) {
+        console.error(error);
+        const { message } = (error as FetchBaseQueryError).data as {
+          message: string;
+        };
+        setConfirmation({ success: false, message });
+      } finally {
+        setStepCompleted(2, true);
+        nextStep();
       }
+    },
+    [registerBike, setStepCompleted, nextStep]
+  );
 
-      const res = await registerBike(d).unwrap();
-      setConfirmation({ success: res.success, message: res.message });
-    } catch (error) {
-      console.error(error);
-      const { message } = (error as FetchBaseQueryError).data as {
-        message: string;
-      };
-      setConfirmation({
-        success: false,
-        message,
-      });
-    } finally {
-      setStepCompleted(2, true);
-      nextStep();
-    }
-  };
+  // Navigation buttons for personal information step
+  const NavigationButtons = useMemo(
+    () => (
+      <div className="mt-4 flex justify-end">
+        <Button
+          size="lg"
+          variant="link"
+          type="button"
+          onClick={prevStep}
+          className="text-blue-600 text-sm uppercase"
+        >
+          Previous
+        </Button>
+        <Button
+          size="lg"
+          type="submit"
+          disabled={!form.formState.isValid || isLoading}
+          variant="default"
+          className="tracking-wider min-w-40"
+        >
+          {isLoading ? (
+            <LoaderCircle size={40} className="animate-spin size-6 font-bold" />
+          ) : (
+            "Submit"
+          )}
+        </Button>
+      </div>
+    ),
+    [prevStep, form.formState.isValid, isLoading]
+  );
 
-  const stepLabels = [
-    "Serial number",
-    "Bike information",
-    "Personal information",
-    "Registration confirmation",
-  ];
+  // Step labels for stepper indicator
+  const Labels = useMemo(
+    () => [
+      "Serial number",
+      "Bike information",
+      "Personal information",
+      "Registration confirmation",
+    ],
+    []
+  );
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(submitHandler)}>
-        <StepperIndicators labels={stepLabels} />
+        <StepperIndicators labels={Labels} />
 
-        <Step index={0}>
-          <StepTitle
-            className="text-2xl text-neutral-500 md:text-3xl font-brandon font-extrabold tracking-wider"
-            stepNumber={0}
-          >
-            SERIAL NUMBER
-          </StepTitle>
-          <StepContent>
-            <RegisterSerielNumber />
-          </StepContent>
-        </Step>
-
-        <Step index={1}>
-          <StepTitle
-            className="text-2xl text-neutral-500 md:text-3xl font-extrabold font-brandon tracking-wider"
-            stepNumber={1}
-          >
-            BIKE INFORMATION
-          </StepTitle>
-          <StepContent>
-            <BikeInformation />
-          </StepContent>
-        </Step>
-
-        <Step index={2}>
-          <div className="flex my-4 gap-4 items-center">
-            <Image
-              width={150}
-              height={150}
-              src={`/assets/${form.getValues("serialNumber")}.jpg`}
-              className="border border-neutral-300"
-              alt="Bike"
-            />
-            <p className="font-bold text-lg">
-              {form.getValues("modelDescription")}
-            </p>
-          </div>
-          <StepTitle
-            className="text-2xl font-brandon text-neutral-500 md:text-3xl font-extrabold tracking-wider"
-            stepNumber={2}
-          >
-            PERSONAL INFORMATION
-          </StepTitle>
-          <StepContent>
-            <PersonalInformation />
-          </StepContent>
-        </Step>
-
-        <Step index={3}>
-          <StepTitle
-            className="text-2xl font-brandon text-neutral-500 md:text-3xl font-extrabold tracking-wider"
-            stepNumber={3}
-          >
-            REGISTRATION CONFIRMATION
-          </StepTitle>
-          <StepContent>
-            <RegisterationConfirmation
-              message={confirmation.message}
-              success={confirmation.success}
-            />
-          </StepContent>
-        </Step>
+        {Labels.map((title, index) => (
+          <Step key={index} index={index}>
+            {index === 2 && <BikeInfoCard imageSize={150} />}
+            <StepTitle
+              className="text-2xl text-neutral-500 md:text-3xl font-brandon uppercase font-extrabold tracking-wider"
+              stepNumber={index}
+            >
+              {title}
+            </StepTitle>
+            <StepContent>
+              {index === 0 && <RegisterSerialNumber />}
+              {index === 1 && <BikeInformation />}
+              {index === 2 && (
+                <>
+                  <PersonalInformation />
+                  {NavigationButtons}
+                </>
+              )}
+              {index === 3 && (
+                <RegisterationConfirmation
+                  message={confirmation.message}
+                  success={confirmation.success}
+                />
+              )}
+            </StepContent>
+          </Step>
+        ))}
       </form>
     </Form>
   );
 };
 
-export default BikeRegisterationForm;
+export default BikeRegistrationForm;

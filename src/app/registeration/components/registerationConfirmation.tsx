@@ -8,6 +8,10 @@ interface RegisterationConfirmationProps {
   message: string;
 }
 
+/**
+ * Final step of registration - Shows success/failure status
+ * Uses appropriate icons and styling based on registration outcome
+ */
 const RegisterationConfirmation = ({
   message,
   success,

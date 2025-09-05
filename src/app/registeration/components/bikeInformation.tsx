@@ -1,14 +1,13 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import Image from "next/image";
+import { CalendarIcon, CircleCheck } from "lucide-react";
+import { format } from "date-fns";
+
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@radix-ui/react-popover";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { useStepper } from "@/components/ui/stepper";
 import { cn } from "@/lib/utils";
@@ -19,24 +18,26 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Calendar } from "@/components/ui/calendar";
 
 import { BikeRegistrationFormData } from "../model/schema";
+import BikeInfoCard from "./bikeInfoCard";
 
+/**
+ * Step 2 of registration form - Displays bike information
+ * Shows serial number, model details, and purchase date selection
+ */
 const BikeInformation = (): React.JSX.Element => {
-  const { control, watch, getValues } =
-    useFormContext<BikeRegistrationFormData>();
-
-  // We are here redirecting to previous step on clicking "This is not my bike" button
-  // In actual scenario it will trigger a different form scenario
+  const { control, watch } = useFormContext<BikeRegistrationFormData>();
   const { prevStep, nextStep, setStepCompleted } = useStepper();
-
-  const dop = watch("dateOfPurchase");
+  const dop = watch("dateOfPurchase"); // Watch date of purchase for validation
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4">
+        {/* Serial Number Field (Read-only) */}
         <FormField
           control={control}
           name="serialNumber"
@@ -47,16 +48,18 @@ const BikeInformation = (): React.JSX.Element => {
                 <Input disabled placeholder="Enter first name!" {...field} />
               </FormControl>
               <FormMessage />
+              <FormDescription className="text-green-500 text-xs items-center flex gap-1 font-bold">
+                <CircleCheck size={14} />
+                Serial Number found
+              </FormDescription>
             </FormItem>
           )}
         />
-        <Image
-          width={400}
-          height={400}
-          alt="Bike"
-          className="object-fit border border-neutral-300"
-          src={`/assets/${getValues("serialNumber")}.jpg`}
-        />
+
+        {/* Bike Image and Basic Info */}
+        <BikeInfoCard imageSize={400} showDescription={false} />
+
+        {/* Model and Shop Details (Read-only) */}
         <FormField
           control={control}
           name="modelDescription"
@@ -70,20 +73,8 @@ const BikeInformation = (): React.JSX.Element => {
             </FormItem>
           )}
         />
-        <FormField
-          control={control}
-          name="shopName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel aria-disabled="true">Shop Name</FormLabel>
-              <FormControl>
-                <Input disabled placeholder="Enter first name!" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
+        {/* Date of Purchase Selection */}
         <FormField
           control={control}
           name="dateOfPurchase"
@@ -132,6 +123,7 @@ const BikeInformation = (): React.JSX.Element => {
         />
       </div>
 
+      {/* Navigation Buttons */}
       <div className="flex justify-end gap-4 mt-4">
         <Button
           variant={"link"}
@@ -143,7 +135,7 @@ const BikeInformation = (): React.JSX.Element => {
         </Button>
 
         <Button
-          disabled={!dop}
+          disabled={!dop} // Disable if date not selected
           type="button"
           size={"lg"}
           onClick={() => {

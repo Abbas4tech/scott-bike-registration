@@ -13,22 +13,31 @@ import React, {
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Interface defining the shape of the stepper context
+ * Provides methods and state for managing multi-step forms
+ */
 interface StepperContextType {
-  activeStep: number;
-  steps: number;
-  nextStep: () => void;
-  prevStep: () => void;
-  goToStep: (_step: number) => void;
-  isStepCompleted: (_step: number) => boolean;
-  setStepCompleted: (_step: number, _completed: boolean) => void;
-  isLastStep: boolean;
-  isFirstStep: boolean;
-  registerStep: (_index: number) => void;
-  isStepsAccessible: boolean;
+  activeStep: number; // Current active step index
+  steps: number; // Total number of steps
+  nextStep: () => void; // Function to move to next step
+  prevStep: () => void; // Function to move to previous step
+  goToStep: (_step: number) => void; // Function to jump to specific step
+  isStepCompleted: (_step: number) => boolean; // Check if step is completed
+  setStepCompleted: (_step: number, _completed: boolean) => void; // Mark step completion
+  isLastStep: boolean; // Whether current step is the last one
+  isFirstStep: boolean; // Whether current step is the first one
+  registerStep: (_index: number) => void; // Register a step with the stepper
+  isStepsAccessible: boolean; // Whether steps can be navigated freely
 }
 
+// Create context for stepper with undefined initial value
 const StepperContext = createContext<StepperContextType | undefined>(undefined);
 
+/**
+ * Custom hook to access stepper context
+ * @throws Error if used outside of StepperProvider
+ */
 const useStepper = (): StepperContextType => {
   const context = useContext(StepperContext);
   if (!context) {
@@ -47,6 +56,10 @@ type StepperProviderProps = {
   isStepsAccessible?: boolean;
 };
 
+/**
+ * Provider component that manages stepper state and provides context to child components
+ * Handles step registration, navigation, and completion status
+ */
 const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
   children,
   defaultStep = 0,
@@ -59,11 +72,13 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
   const [stepIndexes, setStepIndexes] = useState<number[]>([]);
 
   const steps = stepIndexes.length;
-
   const isLastStep = activeStep === steps - 1;
   const isFirstStep = activeStep === 0;
 
-  // Use useCallback to memoize the registerStep function
+  /**
+   * Registers a step with the stepper system
+   * Ensures steps are stored in sorted order
+   */
   const registerStep = useCallback((index: number) => {
     setStepIndexes((prev) => {
       if (!prev.includes(index)) {
@@ -73,12 +88,19 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
     });
   }, []);
 
+  /**
+   * Advances to the next step if not at the last step
+   */
   const nextStep = (): void => {
     if (!isLastStep) {
       setActiveStep((prev) => Math.min(prev + 1, Math.max(0, steps - 1)));
     }
   };
 
+  /**
+   * Returns to the previous step if not at the first step
+   * Respects the isStepsAccessible setting
+   */
   const prevStep = (): void => {
     // If steps are not accessible (forward-only mode), prev should be a no-op.
     if (!isStepsAccessible) {
@@ -89,6 +111,10 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
     }
   };
 
+  /**
+   * Jumps to a specific step with bounds checking
+   * Respects the isStepsAccessible setting for forward-only navigation
+   */
   const goToStep = (step: number): void => {
     if (step < 0 || step >= steps) {
       return;
@@ -102,8 +128,14 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
     }
   };
 
+  /**
+   * Checks if a specific step has been marked as completed
+   */
   const isStepCompleted = (step: number): boolean => !!completedSteps[step];
 
+  /**
+   * Marks a step as completed or not completed
+   */
   const setStepCompleted = (step: number, completed: boolean): void => {
     setCompletedSteps((prev) => ({
       ...prev,
@@ -137,6 +169,10 @@ interface StepProps {
   index: number;
 }
 
+/**
+ * Step component that only renders its children when it's the active step
+ * Automatically registers itself with the stepper system
+ */
 const Step: FC<PropsWithChildren<StepProps>> = ({ children, index }) => {
   const { activeStep, registerStep } = useStepper();
 
@@ -156,6 +192,10 @@ const Step: FC<PropsWithChildren<StepProps>> = ({ children, index }) => {
 type StepTitleProps = HTMLAttributes<HTMLHeadingElement> & {
   stepNumber?: number;
 };
+
+/**
+ * Component for displaying step titles with optional step numbering
+ */
 const StepTitle: FC<StepTitleProps> = forwardRef<
   HTMLHeadingElement,
   StepTitleProps
@@ -170,6 +210,9 @@ const StepTitle: FC<StepTitleProps> = forwardRef<
 
 StepTitle.displayName = "StepTitle";
 
+/**
+ * Container component for step content
+ */
 const StepContent: FC<PropsWithChildren> = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement>
@@ -184,6 +227,10 @@ const StepContent: FC<PropsWithChildren> = forwardRef<
 StepContent.displayName = "StepContent";
 
 // Stepper Navigation Component
+/**
+ * Navigation component with Previous and Next buttons
+ * Respects step accessibility settings and completion status
+ */
 const StepperNavigation: FC = () => {
   const {
     nextStep,
@@ -217,14 +264,19 @@ const StepperNavigation: FC = () => {
 };
 
 // Stepper Indicators Component
-
 type StepIndicatorProps = {
   labels: string[];
 };
 
+/**
+ * Visual indicator component showing progress through steps
+ * Shows labels and allows navigation between steps based on accessibility settings
+ */
 const StepperIndicators: FC<StepIndicatorProps> = ({ labels }) => {
   const { steps, activeStep, goToStep, isStepCompleted, isStepsAccessible } =
     useStepper();
+
+  // Validate that labels match the number of steps
   if (labels.length !== steps) {
     console.error("Labels of Indicator must be equal to steps");
     return null;
@@ -239,10 +291,12 @@ const StepperIndicators: FC<StepIndicatorProps> = ({ labels }) => {
         const completed = isStepCompleted(index);
         const active = index === activeStep;
 
+        // Determine step accessibility based on mode
         const accessible = isStepsAccessible
           ? index === 0 || isStepCompleted(index - 1) || index < activeStep
           : index === activeStep + 1 && isStepCompleted(activeStep);
 
+        // Determine styling based on step state and accessibility mode
         const indicatorClasses = isStepsAccessible
           ? `${
               active
