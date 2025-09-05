@@ -25,7 +25,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { BikeRegistrationFormData } from "../model/schema";
 
 const BikeInformation = (): React.JSX.Element => {
-  const { control, watch } = useFormContext<BikeRegistrationFormData>();
+  const { control, watch, getValues } =
+    useFormContext<BikeRegistrationFormData>();
 
   // We are here redirecting to previous step on clicking "This is not my bike" button
   // In actual scenario it will trigger a different form scenario
@@ -54,7 +55,7 @@ const BikeInformation = (): React.JSX.Element => {
           height={400}
           alt="Bike"
           className="object-fit border border-neutral-300"
-          src={"/assets/SCR29A20M24110345N.jpg"}
+          src={`/assets/${getValues("serialNumber")}.jpg`}
         />
         <FormField
           control={control}
