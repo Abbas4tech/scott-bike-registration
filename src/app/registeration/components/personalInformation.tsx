@@ -111,7 +111,7 @@ const SelectField = memo(
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
             </FormControl>
-            <SelectContent className="w-full font-sans">
+            <SelectContent className="w-full">
               {options.map(({ value, label }) => (
                 <SelectItem key={value} value={value}>
                   {label}
@@ -186,7 +186,7 @@ const DatePickerField = memo(() => (
                 size={"xl"}
                 variant="outline"
                 className={cn(
-                  "pl-3 text-left font-normal capitalize font-sans justify-start",
+                  "pl-3 text-left font-normal capitalize justify-start",
                   !field.value && "text-muted-foreground"
                 )}
               >

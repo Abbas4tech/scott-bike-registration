@@ -275,7 +275,7 @@ const StepperIndicators: FC<StepIndicatorProps> = ({ labels }) => {
               disabled={!accessible}
             >
               <div
-                className={`text-xs font-sans p-3 text-center h-14 flex tracking-wide items-center justify-center cursor-default ${
+                className={`text-xs p-3 text-center h-14 flex tracking-wide items-center justify-center cursor-default ${
                   active ? "text-neutral-900" : "text-muted-foreground"
                 }`}
                 role="button"

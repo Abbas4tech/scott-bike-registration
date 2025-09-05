@@ -111,7 +111,7 @@ function FormLabel({
       data-slot="form-label"
       data-error={!!error}
       className={cn(
-        "data-[error=true]:text-destructive aria-[disabled=true]:text-neutral-400 font-sans text-black tracking-wide font-bold",
+        "data-[error=true]:text-destructive aria-[disabled=true]:text-neutral-400 text-black tracking-wide font-bold",
         className
       )}
       htmlFor={formItemId}
@@ -172,7 +172,7 @@ function FormMessage({
     <p
       data-slot="form-message"
       id={formMessageId}
-      className={cn("text-destructive font-sans text-sm", className)}
+      className={cn("text-destructive text-sm", className)}
       {...props}
     >
       {body}

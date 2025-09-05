@@ -44,7 +44,7 @@
 }
 
 body {
-  font-family: "Brandon", sans-serif;
+  font-family: "Open sans", sans-serif;
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -156,4 +156,8 @@ body {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+@utility font-brandon {
+  font-family: "Brandon", var(--font-open-sans);
 }

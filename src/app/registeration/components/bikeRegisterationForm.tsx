@@ -104,7 +104,7 @@ const BikeRegisterationForm = (): React.JSX.Element => {
 
         <Step index={2}>
           <StepTitle
-            className="text-2xl text-neutral-500 md:text-3xl font-bold tracking-wider"
+            className="text-2xl font-brandon text-neutral-500 md:text-3xl font-bold tracking-wider"
             stepNumber={2}
           >
             PERSONAL INFORMATION
@@ -116,7 +116,7 @@ const BikeRegisterationForm = (): React.JSX.Element => {
 
         <Step index={3}>
           <StepTitle
-            className="text-2xl text-neutral-500 md:text-3xl font-bold tracking-wider"
+            className="text-2xl font-brandon text-neutral-500 md:text-3xl font-bold tracking-wider"
             stepNumber={3}
           >
             REGISTRATION CONFIRMATION

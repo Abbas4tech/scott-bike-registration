@@ -88,17 +88,18 @@ const BikeInformation = (): React.JSX.Element => {
           name="dateOfPurchase"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel className="font-sans tracking-wide font-bold">
+              <FormLabel className="tracking-wide font-bold">
                 Date of Purchase
               </FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
+                      type="button"
                       variant={"outline"}
                       size={"xl"}
                       className={cn(
-                        "pl-3 text-left font-sans font-normal capitalize hover:bg-inherit ring-offset-background justify-start border border-neutral-300 text-muted-foreground",
+                        "pl-3 text-left font-normal capitalize hover:bg-inherit ring-offset-background justify-start border border-neutral-300 text-muted-foreground",
                         !field.value && "text-muted-foreground"
                       )}
                     >
@@ -114,7 +115,7 @@ const BikeInformation = (): React.JSX.Element => {
                 <PopoverContent className="w-full p-0" align="start">
                   <Calendar
                     mode="single"
-                    className="font-sans"
+                    className=""
                     selected={field.value}
                     onSelect={field.onChange}
                     disabled={(date) =>
@@ -142,6 +143,7 @@ const BikeInformation = (): React.JSX.Element => {
 
         <Button
           disabled={!dop}
+          type="button"
           size={"lg"}
           onClick={() => {
             setStepCompleted(1, true);
