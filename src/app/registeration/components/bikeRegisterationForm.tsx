@@ -1,3 +1,4 @@
+"use client";
 import React, { useCallback, useMemo, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
@@ -26,11 +27,17 @@ import PersonalInformation from "./personalInformation";
 import RegisterationConfirmation from "./registerationConfirmation";
 import BikeInfoCard from "./bikeInfoCard";
 
+/**
+ * Main bike registration form component
+ * Manages multi-step form process and submission
+ */
 const BikeRegistrationForm = (): React.JSX.Element => {
   const [confirmation, setConfirmation] = useState({
     success: false,
     message: "",
   });
+
+  // Initialize form with validation schema and default values
   const form = useForm<BikeRegistrationFormData>({
     resolver: zodResolver(bikeRegistrationSchema),
     defaultValues: bikeRegisterationInitialData,
@@ -40,6 +47,7 @@ const BikeRegistrationForm = (): React.JSX.Element => {
   const { setStepCompleted, nextStep, prevStep } = useStepper();
   const [registerBike, { isLoading }] = useRegisterBikeMutation();
 
+  // Form submission handler
   const submitHandler = useCallback<SubmitHandler<BikeRegistrationFormData>>(
     async (data) => {
       try {
@@ -64,6 +72,7 @@ const BikeRegistrationForm = (): React.JSX.Element => {
     [registerBike, setStepCompleted, nextStep]
   );
 
+  // Navigation buttons for personal information step
   const NavigationButtons = useMemo(
     () => (
       <div className="mt-4 flex justify-end">
@@ -94,6 +103,7 @@ const BikeRegistrationForm = (): React.JSX.Element => {
     [prevStep, form.formState.isValid, isLoading]
   );
 
+  // Step labels for stepper indicator
   const Labels = useMemo(
     () => [
       "Serial number",

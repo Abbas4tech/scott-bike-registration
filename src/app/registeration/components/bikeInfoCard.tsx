@@ -1,3 +1,4 @@
+// components/BikeInfoCard.tsx
 import Image from "next/image";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -9,11 +10,17 @@ interface BikeInforCardProps {
   showDescription?: boolean;
 }
 
+/**
+ * Displays bike information with an image and optional description
+ * Renders conditionally based on form data availability
+ */
 const BikeInfoCard = ({
   imageSize,
   showDescription = true,
 }: BikeInforCardProps): React.JSX.Element | undefined => {
   const form = useFormContext<BikeRegistrationFormData>();
+
+  // Don't render if required form data is missing
   if (!form.getValues("modelDescription") || !form.getValues("serialNumber")) {
     return;
   }
@@ -35,4 +42,5 @@ const BikeInfoCard = ({
     </div>
   );
 };
+
 export default BikeInfoCard;

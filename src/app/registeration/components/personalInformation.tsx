@@ -236,6 +236,10 @@ const CheckboxField = memo(
 
 CheckboxField.displayName = "CheckboxField";
 
+/**
+ * Step 3 of registration form - Collects user's personal information
+ * Includes validation and required field markers
+ */
 const PersonalInformation = (): React.JSX.Element => (
   <div className="space-y-6">
     <div className="flex flex-col gap-4">

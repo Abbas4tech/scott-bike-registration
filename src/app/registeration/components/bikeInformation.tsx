@@ -25,18 +25,19 @@ import { Calendar } from "@/components/ui/calendar";
 import { BikeRegistrationFormData } from "../model/schema";
 import BikeInfoCard from "./bikeInfoCard";
 
+/**
+ * Step 2 of registration form - Displays bike information
+ * Shows serial number, model details, and purchase date selection
+ */
 const BikeInformation = (): React.JSX.Element => {
   const { control, watch } = useFormContext<BikeRegistrationFormData>();
-
-  // We are here redirecting to previous step on clicking "This is not my bike" button
-  // In actual scenario it will trigger a different form scenario
   const { prevStep, nextStep, setStepCompleted } = useStepper();
-
-  const dop = watch("dateOfPurchase");
+  const dop = watch("dateOfPurchase"); // Watch date of purchase for validation
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4">
+        {/* Serial Number Field (Read-only) */}
         <FormField
           control={control}
           name="serialNumber"
@@ -54,7 +55,11 @@ const BikeInformation = (): React.JSX.Element => {
             </FormItem>
           )}
         />
+
+        {/* Bike Image and Basic Info */}
         <BikeInfoCard imageSize={400} showDescription={false} />
+
+        {/* Model and Shop Details (Read-only) */}
         <FormField
           control={control}
           name="modelDescription"
@@ -68,20 +73,8 @@ const BikeInformation = (): React.JSX.Element => {
             </FormItem>
           )}
         />
-        <FormField
-          control={control}
-          name="shopName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel aria-disabled="true">Shop Name</FormLabel>
-              <FormControl>
-                <Input disabled placeholder="Enter first name!" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
+        {/* Date of Purchase Selection */}
         <FormField
           control={control}
           name="dateOfPurchase"
@@ -130,6 +123,7 @@ const BikeInformation = (): React.JSX.Element => {
         />
       </div>
 
+      {/* Navigation Buttons */}
       <div className="flex justify-end gap-4 mt-4">
         <Button
           variant={"link"}
@@ -141,7 +135,7 @@ const BikeInformation = (): React.JSX.Element => {
         </Button>
 
         <Button
-          disabled={!dop}
+          disabled={!dop} // Disable if date not selected
           type="button"
           size={"lg"}
           onClick={() => {
