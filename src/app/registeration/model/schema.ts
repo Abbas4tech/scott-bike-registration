@@ -1,5 +1,25 @@
 import z from "zod";
 
+const dataValidations = (message: string): z.ZodPipe =>
+  z.preprocess(
+    (arg) => {
+      if (arg === undefined || arg === null) {
+        return null;
+      }
+      if (typeof arg === "string") {
+        const date = new Date(arg);
+        return isNaN(date.getTime()) ? null : date;
+      }
+      return arg;
+    },
+    z
+      .date()
+      .nullable()
+      .refine((val) => val !== null, {
+        message,
+      })
+  );
+
 export const bikeRegistrationSchema = z.object({
   serialNumber: z.string().min(1, { message: "Serial number is required" }),
   modelDescription: z
@@ -10,14 +30,12 @@ export const bikeRegistrationSchema = z.object({
   lastName: z.string().min(1, { message: "Last name is required" }),
   email: z.email({ message: "Invalid email address" }),
   country: z.string().min(1, { message: "Country is required" }),
-  dateOfPurchase: z.date({
-    error: "Date of purchase is required",
-  }),
+  dateOfPurchase: dataValidations("Date of purchase is required"),
   preferredLanguage: z
     .string()
     .min(1, { message: "At least one language must be selected" }),
   gender: z.string().min(1, { message: "Gender selection is required" }),
-  dateOfBirth: z.date(),
+  dateOfBirth: dataValidations("Date of birth is required"),
   newsOptIn: z.boolean(),
   consent: z.boolean().refine((val) => val === true, {
     message: "You must provide consent to continue",
@@ -30,8 +48,8 @@ export const bikeRegisterationInitialData: BikeRegistrationFormData = {
   serialNumber: "",
   consent: false,
   country: "",
-  dateOfBirth: new Date(),
-  dateOfPurchase: new Date(),
+  dateOfBirth: null,
+  dateOfPurchase: null,
   email: "",
   firstName: "",
   gender: "",

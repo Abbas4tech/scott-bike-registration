@@ -1,13 +1,6 @@
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
 import React, { memo } from "react";
+import { useFormContext } from "react-hook-form";
 
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import {
   FormField,
@@ -16,8 +9,6 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { Calendar } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -27,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import DatePicker from "@/components/ui/date-picker";
 
 import { BikeRegistrationFormData } from "../model/schema";
 import { COUNTRIES, LANGUAGES, GENDERS } from "../model/constants";
@@ -149,49 +141,6 @@ const RadioGroupField = memo(
 
 RadioGroupField.displayName = "RadioGroupField";
 
-const DatePickerField = memo(() => (
-  <FormField
-    name="dateOfBirth"
-    render={({ field }) => (
-      <FormItem className="flex flex-col">
-        <FormLabel className="mb-2">Birthday</FormLabel>
-        <Popover>
-          <PopoverTrigger asChild>
-            <FormControl>
-              <Button
-                size={"xl"}
-                variant="outline"
-                className={cn(
-                  "pl-3 text-left font-normal capitalize hover:bg-inherit ring-offset-background justify-start border border-neutral-300 text-muted-foreground",
-                  !field.value && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="h-4 w-4 opacity-50" />
-                {field.value ? format(field.value, "PPP") : "Pick a date"}
-              </Button>
-            </FormControl>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={field.value}
-              onSelect={field.onChange}
-              disabled={(date) =>
-                date > new Date() || date < new Date("1900-01-01")
-              }
-              initialFocus
-              captionLayout="dropdown"
-            />
-          </PopoverContent>
-        </Popover>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-));
-
-DatePickerField.displayName = "DatePickerField";
-
 const CheckboxField = memo(
   ({
     name,
@@ -240,45 +189,61 @@ CheckboxField.displayName = "CheckboxField";
  * Step 3 of registration form - Collects user's personal information
  * Includes validation and required field markers
  */
-const PersonalInformation = (): React.JSX.Element => (
-  <div className="space-y-6">
-    <div className="flex flex-col gap-4">
-      <TextField name="firstName" label="First Name" placeholder="First Name" />
+const PersonalInformation = (): React.JSX.Element => {
+  const { control } = useFormContext<BikeRegistrationFormData>();
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4">
+        <TextField
+          name="firstName"
+          label="First Name"
+          placeholder="First Name"
+        />
 
-      <TextField name="lastName" label="Last Name" placeholder="Last Name" />
+        <TextField name="lastName" label="Last Name" placeholder="Last Name" />
 
-      <TextField name="email" label="Email" type="email" placeholder="Email" />
+        <TextField
+          name="email"
+          label="Email"
+          type="email"
+          placeholder="Email"
+        />
 
-      <SelectField
-        name="country"
-        label="Country"
-        options={COUNTRIES}
-        placeholder="Select your Country"
+        <SelectField
+          name="country"
+          label="Country"
+          options={COUNTRIES}
+          placeholder="Select your Country"
+        />
+      </div>
+
+      <RadioGroupField
+        name="preferredLanguage"
+        label="Preferred Language"
+        options={LANGUAGES}
+      />
+
+      <RadioGroupField name="gender" label="Gender" options={GENDERS} />
+
+      <FormField
+        control={control}
+        name="dateOfBirth"
+        render={({ field }) => <DatePicker field={field} />}
+      />
+
+      <CheckboxField
+        name="newsOptIn"
+        label="I agree to receive News and Updates from SCOTT Sports."
+      />
+
+      <CheckboxField
+        name="consent"
+        label="I have read and accept the"
+        link="#"
+        linkText="privacy policy."
       />
     </div>
-
-    <RadioGroupField
-      name="preferredLanguage"
-      label="Preferred Language"
-      options={LANGUAGES}
-    />
-
-    <RadioGroupField name="gender" label="Gender" options={GENDERS} />
-
-    <DatePickerField />
-
-    <CheckboxField
-      name="newsOptIn"
-      label="I agree to receive News and Updates from SCOTT Sports."
-    />
-
-    <CheckboxField
-      name="consent"
-      label="I have read and accept the"
-      link="#"
-      linkText="privacy policy."
-    />
-  </div>
-);
+  );
+};
 
 export default memo(PersonalInformation);

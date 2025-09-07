@@ -24,7 +24,7 @@ interface StepperContextType {
   isLastStep: boolean;
   isFirstStep: boolean;
   registerStep: (_index: number) => void;
-  isIndicatorButtonsAccessible: boolean; // Renamed for clarity
+  isIndicatorButtonsAccessible: boolean;
 }
 
 const StepperContext = createContext<StepperContextType | undefined>(undefined);
@@ -44,13 +44,13 @@ type StepperProviderProps = {
    * If true: indicator buttons are clickable for navigation (default behavior).
    * If false: indicator buttons are disabled, navigation must be done programmatically.
    */
-  isIndicatorButtonsAccessible?: boolean; // Renamed for clarity
+  isIndicatorButtonsAccessible?: boolean;
 };
 
 const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
   children,
   defaultStep = 0,
-  isIndicatorButtonsAccessible = true, // Renamed for clarity
+  isIndicatorButtonsAccessible = true,
 }) => {
   const [activeStep, setActiveStep] = useState(defaultStep);
   const [completedSteps, setCompletedSteps] = useState<Record<number, boolean>>(
@@ -112,7 +112,7 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
         isLastStep,
         isFirstStep,
         registerStep,
-        isIndicatorButtonsAccessible, // Renamed for clarity
+        isIndicatorButtonsAccessible,
       }}
     >
       {children}
@@ -120,7 +120,7 @@ const StepperProvider: FC<PropsWithChildren<StepperProviderProps>> = ({
   );
 };
 
-// Step Component (unchanged)
+// Step Component
 interface StepProps {
   index: number;
 }
@@ -139,7 +139,7 @@ const Step: FC<PropsWithChildren<StepProps>> = ({ children, index }) => {
   return <div className="step contaienr max-w-lg mx-auto">{children}</div>;
 };
 
-// StepTitle Component (unchanged)
+// StepTitle Component
 type StepTitleProps = HTMLAttributes<HTMLHeadingElement> & {
   stepNumber?: number;
 };
@@ -171,7 +171,7 @@ const StepContent: FC<PropsWithChildren> = forwardRef<
 
 StepContent.displayName = "StepContent";
 
-// Stepper Navigation Component (unchanged)
+// Stepper Navigation Component
 const StepperNavigation: FC = () => {
   const {
     nextStep,
@@ -215,12 +215,7 @@ const StepperIndicators: FC<StepIndicatorProps> = ({ labels }) => {
     goToStep,
     isStepCompleted,
     isIndicatorButtonsAccessible,
-  } = useStepper(); // Use renamed prop
-
-  if (labels.length !== steps) {
-    console.error("Labels of Indicator must be equal to steps");
-    return null;
-  }
+  } = useStepper();
 
   return (
     <div className="stepper-indicators mx-auto max-w-md md:max-w-3xl flex justify-between mb-8 md:mb-16 relative">

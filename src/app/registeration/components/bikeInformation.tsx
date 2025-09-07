@@ -1,16 +1,9 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import { CalendarIcon, CircleCheck } from "lucide-react";
-import { format } from "date-fns";
+import { CircleCheck } from "lucide-react";
 
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { useStepper } from "@/components/ui/stepper";
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import {
   FormField,
@@ -20,7 +13,7 @@ import {
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
-import { Calendar } from "@/components/ui/calendar";
+import DatePicker from "@/components/ui/date-picker";
 
 import { BikeRegistrationFormData } from "../model/schema";
 import BikeInfoCard from "./bikeInfoCard";
@@ -92,48 +85,7 @@ const BikeInformation = (): React.JSX.Element => {
         <FormField
           control={control}
           name="dateOfPurchase"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel className="tracking-wide font-bold">
-                Date of Purchase
-              </FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      type="button"
-                      variant={"outline"}
-                      size={"xl"}
-                      className={cn(
-                        "pl-3 text-left font-normal capitalize hover:bg-inherit ring-offset-background justify-start border border-neutral-300 text-muted-foreground",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="h-4 w-4 opacity-50" />
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    className=""
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
-                    }
-                    captionLayout="dropdown"
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
+          render={({ field }) => <DatePicker field={field} />}
         />
       </div>
 

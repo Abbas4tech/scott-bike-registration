@@ -1,6 +1,6 @@
 // components/BikeInfoCard.tsx
 import Image from "next/image";
-import React from "react";
+import React, { memo } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { BikeRegistrationFormData } from "../model/schema";
@@ -43,4 +43,4 @@ const BikeInfoCard = ({
   );
 };
 
-export default BikeInfoCard;
+export default memo(BikeInfoCard);
